@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dacare UI</title>
+  <link rel="stylesheet" href="../static/css/styles.css" />
+  <script src="../static/js/common.js"></script>
+  <script src="../static/js/main.js"></script>
+</head>
+<body>
+  <div id="app">
+    <section class="landing-page">
+      <header class="landing-header">
+        <img class="brand-logo" src="/static/images/dacare_logo.png" alt="Dacare" />
+        <div class="header-actions">
+          <button class="link-btn" data-open="signin">Sign in</button>
+          <button class="pill-btn" data-open="signup">Sign up</button>
+        </div>
+      </header>
+
+      <div class="hero-wrap">
+        <div class="hero-copy">
+          <h1>Insurance advice, made simple<br>Get answers from our chatbot</h1>
+          <p>You can inquire about insurance company benefits and procedures.</p>
+          {% comment %} <div class="hero-actions">
+            <button class="primary-btn" data-nav="select">Start</button>
+            <button class="secondary-btn" data-open="terms">Terms</button>
+          </div> {% endcomment %}
+        </div>
+        <div class="illustration">
+          <img src="/static/images/main.png" alt="Chatbot illustration">
+        </div>
+      </div>
+
+      <div class="logo-strip">
+        <img src="/static/images/united_main.png" alt="UnitedHealthcare">
+        <img src="/static/images/cigna_main.png" alt="Cigna">
+        <img src="/static/images/tricare_main.png" alt="TRICARE">
+        <img src="/static/images/msh_main.png" alt="MSH China">
+      </div>
+    </section>
+  </div>
+  <div id="modal-root"></div>
+</body>
+</html>
