@@ -1,15 +1,15 @@
-const state = {
-  insurance: "Cigna",
+const chatState = {
+  insurance: new URLSearchParams(location.search).get("insurance"),
   suggestion: "",
-  attachedFile: "",
-  rating: ""
+  screen:"",
+  compare: new URLSearchParams(location.search).get("compare") === "true"
 };
 
 const insuranceAssets = {
-  "UnitedHealth": "/static/images/united_main.png",
-  "Cigna": "/static/images/cigna_main.png",
-  "TRICARE": "/static/images/tricare_main.png",
-  "MSH China": "/static/images/msh_main.png"
+  UnitedHealth: "/static/images/united_main.png",
+  Cigna: "/static/images/cigna_chat.png",
+  Tricare: "/static/images/tricare_main.png",
+  "MSH China": "/static/images/msh_chat.png"
 };
 
 const suggestions = [
@@ -25,106 +25,31 @@ const suggestions = [
   "Direct Billing Network Availability"
 ];
 
-function renderSidebar() {
-  return `
-    <aside class="sidebar">
-      <div class="sidebar-top">
-        <img class="mini-logo" src="/static/images/dacare_logo.png" alt="Dacare">
-      </div>
-      <button class="new-chat" data-nav="chat-empty">+New Chat</button>
+// 보험선택
+function renderInsuranceCards() {
+  const cardsContainer = document.getElementById("cards");
+  if (!cardsContainer) return;
 
-      <div class="history">
-        <h4>Chat History</h4>
-        <div class="history-item">2026.04.18 16:30 - Cigna</div>
-        <div class="history-item">2026.04.17 10:15 - UnitedHealth</div>
-        <div class="history-item">2026.04.14 09:00 - TRICARE</div>
-        <div class="history-item">2026.04.10 14:20 - Cigna</div>
-      </div>
-
-      <div class="side-footer">
-        <button data-open="profile"><img src="/static/images/cogwheel.png" alt=""> User Name</button>
-        <button data-open="feedback">Feedback</button>
-      </div>
-    </aside>
-  `;
-}
-
-function renderNoticeBar() {
-  return `
-    <div class="notice-bar">
-      ※ The responses provided by this chatbot are for reference purposes only. Actual coverage details and costs may vary depending on your insurance policy terms and conditions.
-      For accurate information regarding coverage and claim amounts, please consult your insurance provider or an official support channel.
-    </div>
-  `;
-}
-
-function renderSelect() {
-  const cards = Object.entries(insuranceAssets).map(([name, src]) => `
-    <button class="insurance-card ${state.insurance === name ? "active" : ""}" data-insurance="${name}">
-      <img src="${src}" alt="${name}">
-    </button>
-  `).join("");
-
-  const app = document.getElementById("app");
-  app.innerHTML = `
-    <section class="app-shell">
-      ${renderSidebar()}
-      <main class="main-panel">
-        ${renderNoticeBar()}
-        <div class="center-stage">
-          <div class="insurance-title">Please select your insurance.</div>
-          <div class="insurance-grid">${cards}</div>
-          <div class="insurance-actions">
-            <button class="primary-btn" data-nav="chat-empty">Continue</button>
-          </div>
-        </div>
-      </main>
-    </section>
-  `;
-}
-
-function renderChatShell(content) {
-  return `
-    <section class="app-shell">
-      ${renderSidebar()}
-      <main class="main-panel">
-        ${renderNoticeBar()}
-        ${content}
-      </main>
-    </section>
-  `;
+  cardsContainer.innerHTML = Object.entries(insuranceAssets)
+    .map(
+      ([name, src]) => `
+        <button class="insurance-card ${chatState.insurance === name ? "active" : ""}" data-insurance="${name}">
+          <img src="${src}" alt="${name}">
+        </button>
+      `
+    )
+    .join("");
 }
 
 function renderBottomInput() {
   return `
     <div class="bottom-input-wrap">
       <div class="bottom-input">
-        <label class="upload-label icon-btn" title="attach">
-          📎
-          <input id="fileInput" type="file" hidden>
-        </label>
-        <span class="upload-name">${state.attachedFile || ""}</span>
-        <input class="chat-input" id="chatInput" placeholder="What would you like to know?" value="${state.suggestion || ""}">
+        <textarea class="chat-input" id="chatInput" placeholder="What would you like to know?"></textarea>
         <button class="send-btn" id="sendBtn">➤</button>
       </div>
     </div>
   `;
-}
-
-function renderChatEmpty() {
-  return renderChatShell(`
-    <div class="center-stage">
-      <div class="chat-empty-title">What are you curious about?</div>
-      <div class="search-bar"></div>
-      <div class="prompt-row">
-        <button class="prompt-pill" data-fill="추천 기능 1">추천 기능 1</button>
-        <button class="prompt-pill" data-fill="추천 기능 2">추천 기능 2</button>
-        <button class="prompt-pill" data-fill="추천 기능 3">추천 기능 3</button>
-        <button class="prompt-pill" data-fill="추천 기능 4">추천 기능 4</button>
-      </div>
-    </div>
-    ${renderBottomInput()}
-  `);
 }
 
 function conversationMarkup(extra = "") {
@@ -132,12 +57,9 @@ function conversationMarkup(extra = "") {
     <div class="chat-view">
       <div class="message-row right">
         <div class="message-bubble-right">
-          Will the beneficiary be covered if they receive treatment in their country of nationality?
-          If there are limitations, what are they?
+          ${chatState.suggestion || `Will the beneficiary be covered if they receive treatment in their country of nationality?<br>If there are limitations, what are they?`}
         </div>
       </div>
-
-      <div class="center-caption">Gold Plan, $100 deductible, $20 co-payment.</div>
 
       <div class="message-row left">
         <div style="width:100%">
@@ -156,38 +78,218 @@ function conversationMarkup(extra = "") {
   `;
 }
 
-function renderChatConversation() {
-  return renderChatShell(conversationMarkup());
+function renderSelectCardScreen() {
+  const stage = document.getElementById("chat_stage");
+  if (!stage) return;
+    stage.innerHTML = `
+      <div class="insurance-title">Please select your insurance.</div>
+      <div class="insurance-grid" id="cards"></div>
+      <div class="insurance-actions">
+        <button class="primary-btn" onclick="selectInsurance()">Continue</button>
+      </div>
+    `;
+    renderInsuranceCards();
+    bindChatEvents();
+    return;
+}
+// }
+
+function bindChatEvents() {
+  bindModalEvents();
+
+  document.querySelectorAll("[data-fill]").forEach((el) => {
+    el.addEventListener("click", () => {
+      chatState.suggestion = el.dataset.fill;
+      const input = document.getElementById("chatInput");
+      if (input) input.value = chatState.suggestion;
+
+      document.querySelectorAll(".chip, .prompt-pill").forEach((x) => x.classList.remove("active"));
+      if (el.classList.contains("chip")) el.classList.add("active");
+    });
+  });
+
+  $(".send-btn").click(function(){
+    const input = document.getElementById("chatInput");
+    const text = input ? input.value.trim() : "";
+    if (text) chatState.suggestion = text;
+    chatState.screen = "chat-suggest";
+    renderInsuranceChat();
+  });
 }
 
-function renderChatAttachment() {
-  return renderChatShell(conversationMarkup(`
-    <div class="attach-file">
-      <span>📎</span><span>${state.attachedFile || "Claim.pdf"}</span>
+function openProfile(){
+  // 기존 사용자 정보 불러오는 로직 추가
+  let html = "";
+  html = modalWrapper(`
+    <div class="modal-title">User Information</div>
+    <div class="form-field">
+      <label>Name</label><input class="form-input" value="Nick Name" />
     </div>
-  `));
+    <div class="form-field">
+      <label>Email address</label><input class="form-input gray" value="user@example.com" disabled />
+    </div>
+    <div class="hr"></div>
+    <div class="form-field">
+      <label>Password</label><input class="form-input" type="password" />
+    </div>
+    <div class="form-field">
+      <label>New Password</label><input class="form-input" type="password" />
+    </div>
+    <div class="form-field">
+      <label>New Password Confirm</label><input class="form-input" type="password" />
+    </div>
+    <div style="text-align:center">
+      <button class="primary-btn" id="saveProfile">Save</button>
+    </div>
+  `, "medium");
+  openModal(html);
+}
+function openFeedback(){
+  let html = "";
+  html = modalWrapper(`
+    <div class="modal-title">Please give us feedback</div>
+    <button class="option-btn o1" data-rate="very satisfied">very satisfied</button>
+    <button class="option-btn o2" data-rate="satisfied">satisfied</button>
+    <button class="option-btn o3" data-rate="average">average</button>
+    <button class="option-btn o4" data-rate="dissatisfied">dissatisfied</button>
+    <button class="option-btn o5" data-rate="very dissatisfied">very dissatisfied</button>
+    <div style="font-size:12px;margin:14px 0 10px">Please leave us valuable comments. It's a great help!</div>
+    <textarea class="form-textarea" id="feedbackText"></textarea>
+    <div style="height:18px"></div>
+    <div style="text-align:center">
+      <button class="primary-btn" id="feedbackSubmit">Submit</button>
+    </div>
+  `, "medium");
+  openModal(html);
 }
 
-function renderChatSuggestions() {
-  const chips = suggestions.map(text => `
-    <button class="chip ${state.suggestion === text ? "active" : ""}" data-fill="${text}">${text}</button>
-  `).join("");
-
-  return renderChatShell(conversationMarkup(`
-    <div class="tags-row">${chips}</div>
-  `));
+function setInsurance(){
+    $(".dropdown-label").attr("src", insuranceAssets[chatState.insurance]);
 }
 
-function modalWrapper(inner, size = "medium") {
-  return `
-    <div class="backdrop" data-close></div>
-    <section class="modal ${size}">
-      <button class="close-btn" data-close><img src="/static/images/close.png" alt="close"></button>
-      ${inner}
-    </section>
+function renderInsuranceChat() {
+  setInsurance();
+
+  const stage = document.getElementById("chat_stage");
+  if (chatState.screen === "chat-suggest") {
+    stage.innerHTML = conversationMarkup();
+    bindChatEvents();
+    return;
+  }
+
+  stage.innerHTML = `
+    <div class="center-stage">
+      <div class="chat-empty-title">What are you curious about?</div>
+      <div class="search-bar">
+        <textarea id="chatInput" class="search-textarea" placeholder="What would you like to know?"></textarea>
+        <button class="send-btn">➤</button>
+      </div>
+      <div class="prompt-row">
+        <button class="prompt-pill" data-fill="Pre authorization Requirement for Hospitalization">Pre authorization Requirement for Hospitalization</button>
+        <button class="prompt-pill" data-fill="Cost-Sharing Structure">Cost-Sharing Structure</button>
+        <button class="prompt-pill" data-fill="Mental Health Coverage">Mental Health Coverage</button>
+        <button class="prompt-pill" data-fill="Annual Coverage Limit">Annual Coverage Limit</button>
+      </div>
+    </div>
   `;
+  bindChatEvents();
+  return;
+}
+
+function selectInsurance(){
+  if(chatState.insurance) {
+    window.location.href = "./chat?insurance=" + chatState.insurance;
+  } else {
+    showAlert("Please select an insurance plan to continue.");
+  }
+}
+
+function renderCompareScreen(){
+  const stage = document.getElementById("chat_stage");
+  stage.innerHTML = `
+    <section class="compare-area">
+        <div class="message-row left">
+          <div style="width:100%">
+            <div class="ask-line">
+              <span class="ask-avatar">🤖</span>
+              <div class="message-bubble-left" style="margin-top:10px">
+                Hello! let me help you with comparing. Which would you like to compare? Here are some examples.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="selection-guide">You can select multiple comparison topics.</div>
+
+        <div class="topic-grid" id="topicGrid">
+          <button class="topic-chip" data-topic="Annual Coverage Limit">Annual Coverage Limit</button>
+          <button class="topic-chip" data-topic="Pre-authorization Requirement for Hospitalization">Pre-authorization Requirement for Hospitalization</button>
+          <button class="topic-chip" data-topic="Cost-Sharing Structure">Cost-Sharing Structure</button>
+          <button class="topic-chip" data-topic="Outpatient Coverage Availability">Outpatient Coverage Availability</button>
+          <button class="topic-chip selected" data-topic="Maternity and Prenatal Coverage">Maternity and Prenatal Coverage</button>
+          <button class="topic-chip selected" data-topic="Mental Health Coverage">Mental Health Coverage</button>
+          <button class="topic-chip selected" data-topic="Dental and Vision Coverage">Dental and Vision Coverage</button>
+          <button class="topic-chip selected" data-topic="Emergency Medical Evacuation">Emergency Medical Evacuation</button>
+          <button class="topic-chip selected" data-topic="Coverage for Pre-existing Conditions">Coverage for Pre-existing Conditions</button>
+          <button class="topic-chip selected" data-topic="Direct Billing Network Availability">Direct Billing Network Availability</button>
+        </div>
+      </section>
+      ${renderBottomInput()}
+    `;
+    const chips = document.querySelectorAll('.topic-chip');
+
+    chips.forEach((chip) => {
+      chip.addEventListener('click', () => {
+        chip.classList.toggle('selected');
+      });
+    });
+    const textarea = document.getElementById('chatInput');
+    $(".send-btn").click(function(){
+      const selectedTopics = [...document.querySelectorAll('.topic-chip.selected')].map((el) => el.dataset.topic);
+      const message = textarea.value.trim();
+      textarea.value = '';
+      const compareArea = document.querySelector('.compare-area');
+      compareArea.innerHTML += `<div class="message-row right">
+        <div class="message-bubble-right">
+          ${message} - Selected Topics: ${selectedTopics.join(', ')}
+        </div>
+      </div>`;
+      console.log({ message, selectedTopics });
+    });
+
+}
+
+function eventBind() {
+
+  $(".dropdown-item").click(function(){
+      window.location.href = "./chat?insurance=" + $(this).text().trim();
+  });
+
+  document.querySelectorAll("[data-insurance]").forEach((el) => {
+    el.addEventListener("click", () => {
+      chatState.insurance = el.dataset.insurance;
+      renderInsuranceCards();
+      bindChatEvents();
+    });
+  });
+
+  $(".dropdown-trigger").click(function(){
+    if ($(".dropdown-menu").hasClass("hidden")) {
+      $(".dropdown-menu").removeClass("hidden");
+    } else {
+      $(".dropdown-menu").addClass("hidden");
+    }
+  });
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-    renderSelect();
+  if (chatState.insurance) {
+    $(".dropdown-trigger").removeClass("hidden");
+    renderInsuranceChat();
+  } else if(chatState.compare) {
+    renderCompareScreen();
+  } else {
+    renderSelectCardScreen()
+  }
+  eventBind();
 });
