@@ -135,7 +135,10 @@ img {
 .chip:hover,
 .insurance-card:hover,
 .prompt-pill:hover {
-  transform: translateY(-1px);
+  border-color: #3b82f6;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  /*그림자 깊이*/
+  transform: translateY(-4px);
 }
 
 .primary-btn {
@@ -332,7 +335,7 @@ img {
 
 .main-panel {
   height: 100vh;
-  padding: 12px 18px 84px;
+  padding: 12px 40px 84px;
   position: relative;
   overflow-y: auto;
   overflow-x: hidden;
@@ -449,14 +452,15 @@ img {
 }
 
 .center-stage {
-  max-width: 1200px;
+  max-width: 1400px;
   margin: 0 auto;
 }
 
 .insurance-title,
 .chat-empty-title {
+  color: #4289e0;
   text-align: center;
-  font-size: 22px;
+  font-size: 40px;
   font-weight: 700;
   margin-top: 148px;
 }
@@ -470,14 +474,25 @@ img {
 }
 
 .insurance-card {
-  background: transparent;
+  /* background: transparent;
   border: 1px solid transparent;
   border-radius: 18px;
   padding: 14px;
   min-height: 150px;
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: center; */
+  background-color: #ffff;
+  border:1px solid #ccccc6;
+  border-radius:16px;
+  padding:32px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  transition: all 0.5s ease-in-out; /* 전환 효과 */
+  height:150px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor: pointer;
 }
 
 .insurance-card.active {
@@ -673,14 +688,15 @@ img {
 
 .bottom-input-wrap {
   position: fixed;
-  left: 285px;
+  left: 245px;
   right: 18px;
   bottom: 12px;
   z-index: 5;
 }
 
 .bottom-input {
-  max-width: 1200px;
+  margin: 0 auto;
+  max-width: 1400px;
   height: 60px;
   border-radius: 999px;
   background: #e7f7ff;
@@ -1029,12 +1045,14 @@ img {
   max-width: 1290px;
   margin: 0 auto;
 }
+
 .assistant-row {
   display: flex;
   align-items: center;
   gap: 14px;
   margin-left: 48px;
 }
+
 .assistant-avatar {
   width: 50px;
   height: 50px;
@@ -1044,6 +1062,7 @@ img {
   justify-content: center;
   font-size: 30px;
 }
+
 .assistant-bubble {
   background: #e9f8ff;
   border-radius: 22px;
@@ -1052,6 +1071,7 @@ img {
   min-width: 800px;
   max-width: 980px;
 }
+
 .selection-guide {
   margin: 18px 0 20px 50px;
   color: #5e6b78;
@@ -1066,8 +1086,9 @@ img {
   max-width: 1360px;
   margin-top: 300px;
 }
+
 .topic-chip {
-  width:200px;
+  width: 200px;
   border: 1px solid #d4d4d4;
   border-radius: 22px;
   background: #f7f7f7;
@@ -1075,13 +1096,15 @@ img {
   padding: 11px;
   font-size: 12px;
   line-height: 1.15;
-  box-shadow: 0 1px 0 rgba(0,0,0,.03);
+  box-shadow: 0 1px 0 rgba(0, 0, 0, .03);
   transition: transform .12s ease, box-shadow .12s ease, background .12s ease, color .12s ease;
 }
+
 .topic-chip:hover {
   transform: translateY(-1px);
-  box-shadow: 0 4px 14px rgba(0,0,0,.08);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, .08);
 }
+
 .topic-chip.selected {
   background: #3891ee;
   color: #fff;
@@ -1094,6 +1117,7 @@ img {
   right: 140px;
   bottom: 42px;
 }
+
 .composer {
   max-width: 1220px;
   margin: 0 auto;
@@ -1106,6 +1130,7 @@ img {
   align-items: flex-end;
   padding: 18px 18px 14px 16px;
 }
+
 .composer-textarea {
   flex: 1;
   min-height: 78px;
@@ -1120,20 +1145,27 @@ img {
   color: #385264;
   padding-right: 8px;
 }
-.composer-textarea::placeholder { color: #a8afb7; }
+
+.composer-textarea::placeholder {
+  color: #a8afb7;
+}
+
 .composer-textarea::-webkit-scrollbar {
   width: 10px;
 }
+
 .composer-textarea::-webkit-scrollbar-track {
   background: transparent;
   margin: 6px 0;
 }
+
 .composer-textarea::-webkit-scrollbar-thumb {
   background: linear-gradient(180deg, #cce6f2 0%, #9fcddd 100%);
   border-radius: 999px;
   border: 2px solid transparent;
   background-clip: padding-box;
 }
+
 .composer-textarea::-webkit-scrollbar-thumb:hover {
   background: linear-gradient(180deg, #b8dced 0%, #84bbcf 100%);
   background-clip: padding-box;
@@ -1252,4 +1284,99 @@ img {
 .file-size {
   font-size: 12px;
   color: #6b7280;
+}
+
+/*uiverse.io 템플릿 코드로 Sign in, Sign up 버튼 효과 넣음*/
+.fancy-btn {
+  position: relative;
+  overflow: visible;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.fancy-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 18px rgba(76, 131, 250, 0.18);
+}
+
+.fancy-btn .star {
+  position: absolute;
+  font-size: 10px;
+  line-height: 1;
+  color: #4c83fa;
+  opacity: 0;
+  pointer-events: none;
+  transform: scale(0.3) rotate(0deg);
+}
+
+/* 기본 위치: 버튼 안쪽에 숨어 있게 */
+.fancy-btn .star-1 {
+  top: 55%;
+  left: 35%;
+  transition: all 0.7s cubic-bezier(0.05, 0.83, 0.43, 0.96);
+}
+
+.fancy-btn .star-2 {
+  top: 50%;
+  left: 50%;
+  font-size: 8px;
+  transition: all 0.9s cubic-bezier(0, 0.4, 0, 1.01);
+}
+
+.fancy-btn .star-3 {
+  top: 60%;
+  left: 62%;
+  font-size: 7px;
+  transition: all 0.8s cubic-bezier(0, 0.4, 0, 1.01);
+}
+
+.fancy-btn .star-4 {
+  top: 45%;
+  left: 70%;
+  font-size: 9px;
+  transition: all 0.75s cubic-bezier(0, 0.4, 0, 1.01);
+}
+
+/* hover 시 각자 다른 방향으로 퍼지게 */
+.fancy-btn:hover .star-1 {
+  top: -12px;
+  left: -6px;
+  opacity: 1;
+  transform: scale(1.15) rotate(12deg);
+}
+
+.fancy-btn:hover .star-2 {
+  top: -16px;
+  left: 28%;
+  opacity: 1;
+  transform: scale(0.95) rotate(-18deg);
+}
+
+.fancy-btn:hover .star-3 {
+  top: 60%;
+  left: 88%;
+  opacity: 1;
+  transform: scale(0.85) rotate(20deg);
+}
+
+.fancy-btn:hover .star-4 {
+  top: 85%;
+  left: 62%;
+  opacity: 1;
+  transform: scale(1.05) rotate(-10deg);
+}
+
+.error-text {
+  min-height: 20px;
+  margin-top: 8px;
+  color: #e74c3c;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.input-error {
+  border: 2px solid #e74c3c !important;
+}
+
+.form-input::placeholder {
+  color: #9a9a9a;
 }

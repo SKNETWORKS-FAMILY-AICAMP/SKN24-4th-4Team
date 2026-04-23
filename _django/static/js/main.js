@@ -3,13 +3,13 @@ function openSignup() {
   html = modalWrapper(`
       <div class="modal-title big">Sign up</div>
       <div class="form-field">
-        <label>Name</label><input class="form-input" id="signupName" />
+        <label>Nickname</label><input class="form-input" id="signupName" type="text" />
       </div>
       <div class="form-field">
-        <label>Email address</label><input class="form-input" id="signupEmail" />
+        <label>Email address</label><input class="form-input" id="signupEmail" type="text" />
       </div>
       <div class="form-field">
-        <label>Password</label><input class="form-input" id="signupPw" type="password" />
+        <label>Password</label><input class="form-input" id="signupPw" type="password" placeholder="8–16 characters, letters, numbers, and symbols" />
       </div>
       <div class="form-field">
         <label>Password Confirm</label><input class="form-input" id="signupPw2" type="password" />
@@ -78,15 +78,49 @@ function eventBind() {
   const signupSubmit = document.getElementById("signupSubmit");
   if (signupSubmit) {
     signupSubmit.addEventListener("click", () => {
-      const email = document.getElementById("signupEmail")?.value.trim() || "";
-      const pw = document.getElementById("signupPw")?.value || "";
-      const pw2 = document.getElementById("signupPw2")?.value || "";
+      const emailInput = document.getElementById("signupEmail");
+      const pwInput = document.getElementById("signupPw");
+      const pw2Input = document.getElementById("signupPw2");
       const agreed = document.getElementById("signupAgree")?.checked;
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+      const email = emailInput.value.trim();
+      const pw = pwInput.value;
+      const pw2 = pw2Input.value;
+
+      // 안내 표시
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      const passwordRegex =/^(?=.*[A-Za-z])(?=.*\d)(?=.*[!@#$%^&*()_\-+=\[{\]};:'",<.>/?\\|`~]).{8,16}$/;
+          
+      let isValid = true;
+      //초기화
+      emailError.textContent = "";
+      pwError.textContent = "";
+      pw2Error.textContent = "";
+      
+
+      emailInput.classList.remove("input-error");
+      pwInput.classList.remove("input-error");
+      pw2Input.classList.remove("input-error");
+      
+      // 약관 체크
       if (!agreed) return showAlert("Please agree to Terms and Conditions.");
-      if (!emailRegex.test(email)) return showAlert("Please check the email format.");
-      if (pw !== pw2) return showAlert("Password does not match.");
+      //이메일 검사
+      if (!emailRegex.test(email)) {emailError.textContent = "Please check the email format";
+        isValid = false;
+      }
+      // 비밀번호 검사
+      if (!passwordRegex.test(pw)) {
+        pwError.textContent = "Please check the password";
+        isValid = false;
+      }
+      // 비밀번호 확인 검사
+      //if (pw !== pw2) return showAlert("Password does not match.");
+      if (pw2 === "" || pw !== pw2) {
+        pw2Error.textContent = "Please check the new password";
+        pw2Input.classList.add("input-error");
+        isValid = false;
+      }
+      if (!isValid) return;
 
       closeModal();
       showAlert("Sign up completed.");

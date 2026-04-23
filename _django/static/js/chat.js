@@ -25,15 +25,18 @@ const suggestions = [
   "Direct Billing Network Availability"
 ];
 
-// 선처리 이벤트
-
-
-// 보험선택
-function renderInsuranceCards() {
-}
+const exampleBotText = `
+When the beneficiary receives treatment in their country of nationality, coverage must meet specific conditions.
+This policy covers treatment costs only if the beneficiary is temporarily residing in their country of nationality.
+Under these circumstances, the beneficiary's stay in their country of nationality is limited, and that period cannot be exceeded
+[Source: CGHP Policy Rules CGIC EN 02_2026.pdf / Page: 4].
+`;
 
 function renderBottomInput() {
-  return `
+  let stage = document.getElementById("chat_stage");
+  if (!stage) return;
+  stage.innerHTML +=
+  `
     <div class="bottom-input-wrap">
       <div class="bottom-input">
         <textarea class="chat-input" id="chatInput" placeholder="What would you like to know?"></textarea>
@@ -43,38 +46,18 @@ function renderBottomInput() {
   `;
 }
 
-function conversationMarkup(extra = "") {
-  return `
-    <div class="chat-view">
-      <div class="message-row right">
-        <div class="message-bubble-right">
-          ${chatState.suggestion || `Will the beneficiary be covered if they receive treatment in their country of nationality?<br>If there are limitations, what are they?`}
-        </div>
-      </div>
-
-      <div class="message-row left">
-        <div style="width:100%">
-          <div class="ask-line">
-            <img src="/static/images/bot_profile.png" alt="Bot Avatar" class="ask-avatar">
-            <div class="message-bubble-left" style="margin-top:10px">
-              When the beneficiary receives treatment in their country of nationality, coverage must meet specific conditions.
-              This policy covers treatment costs only if the beneficiary is temporarily residing in their country of nationality.
-              Under these circumstances, the beneficiary's stay in their country of nationality is limited, and that period cannot be exceeded
-              [Source: CGHP Policy Rules CGIC EN 02_2026.pdf / Page: 4].
-            </div>
-          </div>
-          ${extra}
-        </div>
-      </div>
-    </div>
-    ${renderBottomInput()}
-  `;
+function conversationMarkup() {
+  $("#chat_stage").html("");
+  userMessageAppend(chatState.suggestion);
+  botMessageAppend();
+  renderBottomInput();
 }
 
-function fileMessageAppend() {
+// 챗봇이 파일을 return 했을 때 메시지에 파일 첨부하는 함수
+function fileMessageAppend(fileName="Claim.pdf", fileSize= "1.2 MB", fileType="PDF", filePath="/static/images/bot_profile.png") {
   $(".chat-view").append(`
       <div class="file-attachment-wrap">
-        <button class="file-attachment" type="button" onclick="downloadAttachedFile()">
+        <button class="file-attachment" type="button" onclick="downloadAttachedFile('${filePath}')">
           <span class="file-icon" aria-hidden="true">
             <svg viewBox="0 0 24 24" fill="none">
               <path d="M7 3.75h6.2L18.25 8.8V20a1.25 1.25 0 0 1-1.25 1.25H7A1.25 1.25 0 0 1 5.75 20V5A1.25 1.25 0 0 1 7 3.75Z" stroke="currentColor" stroke-width="1.8"></path>
@@ -82,17 +65,47 @@ function fileMessageAppend() {
             </svg>
           </span>
           <span class="file-meta">
-            <span class="file-name">Claim.pdf</span>
-            <span class="file-size">PDF · 1.2 MB</span>
+            <span class="file-name">${fileName}</span>
+            <span class="file-size">${fileType} · ${fileSize}</span>
           </span>
         </button>
       </div>`);
 }
 
-function userMessageAppend(message) {
+// 파일 다운로드 함수
+function downloadAttachedFile(filePath) {
+  const link = document.createElement("a");
+  link.href = filePath;
+  link.download = filePath.split("/").pop();
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
 }
 
-function botMessageAppend(message) {
+// user 메시지 추가 함수
+function userMessageAppend(message) {
+  $("#chat_stage").append(`
+      <div class="message-row right">
+        <div class="message-bubble-right">
+          ${message}
+        </div>
+    </div>`);
+}
+
+// bot 답변 추가 함수
+function botMessageAppend(message = exampleBotText) {
+  $("#chat_stage").append(`
+      <div class="message-row left">
+        <div style="width:100%">
+          <div class="ask-line">
+            <img src="/static/images/bot_profile.png" alt="Bot Avatar" class="ask-avatar">
+            <div class="message-bubble-left" style="margin-top:10px">
+              ${exampleBotText}
+            </div>
+          </div>
+        </div>
+      </div>
+    `);
 }
 
 function botMessageTableAppend(message) {
@@ -102,7 +115,7 @@ function renderSelectCardScreen() {
   const stage = document.getElementById("chat_stage");
   if (!stage) return;
     stage.innerHTML = `
-      <div class="insurance-title">Please select your insurance.</div>
+      <div class="insurance-title">Please select your insurance</div>
       <div class="insurance-grid" id="cards"></div>
       <div class="insurance-actions">
         <button class="primary-btn" onclick="selectInsurance()">Continue</button>
@@ -152,6 +165,7 @@ function bindChatEvents() {
     const input = document.getElementById("chatInput");
     const text = input ? input.value.trim() : "";
     if (text) chatState.suggestion = text;
+    // 최초 질문 작성시 중간에 있는 chat-stage를 초기화해줘야됨.
     if (chatState.screen !== "chat-suggest") {
       chatState.screen = "chat-suggest";
       renderInsuranceChat();
@@ -162,14 +176,14 @@ function bindChatEvents() {
 }
 
 function addUserMessage(message) {
-  $(".chat-view").append(`
+  $("#chat_stage").append(`
     <div class="message-row right">
       <div class="message-bubble-right">
         ${message}
       </div>
     </div>`);
    // 챗봇 답변 예시 추가
-   $(".chat-view").append(`
+   $("#chat_stage").append(`
     <div class="message-row left">
       <div style="width:100%">
         <div class="ask-line">
@@ -233,26 +247,25 @@ function renderInsuranceChat() {
 
   const stage = document.getElementById("chat_stage");
   if (chatState.screen === "chat-suggest") {
-    stage.innerHTML = conversationMarkup();
-    bindChatEvents();
-    return;
+    // 기본 틀 다시 맞추기
+    conversationMarkup();
+  } else {
+    stage.innerHTML = `
+      <div class="center-stage">
+        <div class="chat-empty-title">What are you curious about?</div>
+        <div class="search-bar">
+          <textarea id="chatInput" class="search-textarea" placeholder="What would you like to know?"></textarea>
+          <button class="send-btn" id="sendBtn">➤</button>
+        </div>
+        <div class="prompt-row">
+          <button class="prompt-pill" data-fill="Pre authorization Requirement for Hospitalization">Pre authorization Requirement for Hospitalization</button>
+          <button class="prompt-pill" data-fill="Cost-Sharing Structure">Cost-Sharing Structure</button>
+          <button class="prompt-pill" data-fill="Mental Health Coverage">Mental Health Coverage</button>
+          <button class="prompt-pill" data-fill="Annual Coverage Limit">Annual Coverage Limit</button>
+        </div>
+      </div>
+    `;
   }
-
-  stage.innerHTML = `
-    <div class="center-stage">
-      <div class="chat-empty-title">What are you curious about?</div>
-      <div class="search-bar">
-        <textarea id="chatInput" class="search-textarea" placeholder="What would you like to know?"></textarea>
-        <button class="send-btn" id="sendBtn">➤</button>
-      </div>
-      <div class="prompt-row">
-        <button class="prompt-pill" data-fill="Pre authorization Requirement for Hospitalization">Pre authorization Requirement for Hospitalization</button>
-        <button class="prompt-pill" data-fill="Cost-Sharing Structure">Cost-Sharing Structure</button>
-        <button class="prompt-pill" data-fill="Mental Health Coverage">Mental Health Coverage</button>
-        <button class="prompt-pill" data-fill="Annual Coverage Limit">Annual Coverage Limit</button>
-      </div>
-    </div>
-  `;
   bindChatEvents();
   return;
 }
@@ -318,7 +331,7 @@ function renderCompareScreen(){
       compareArea.innerHTML += `
       <div class="ask-line">
         <img src="/static/images/bot_profile.png" alt="Bot Avatar" class="ask-avatar">
-        <div class="message-bubble-left" style="margin-top:10px">Here is the simplified comparison of the standard entry-level plans from the selected providers, based on your requested criteria. Data below is illustrative for reference: [UHCG_Global_Plus_Standard_2026.pdf p.14, Cigna_Global_Health_Options_Silver.pdf p.28
+        <div class="message-bubble-left" style="margin-top:10px">Here is the simplified comparison of the standard entry-level plans from the selected providers, based on your requested criteria. Data below is illustrative for reference:[UHCG_Global_Plus_Standard_2026.pdf p.14, Cigna_Global_Health_Options_Silver.pdf p.28
 TRICARE_Overseas_Program_Handbook.pdf p.42, MSH_International_Policy_Rules_V8.pdf p.19]</div> 
       </div>`;
       compareArea.innerHTML += `
