@@ -100,10 +100,12 @@ img {
   margin: 0;
   font-family: Georgia, "Times New Roman", serif;
   color: #4a378d;
-  font-size: clamp(44px, 3vw, 70px);
+  /* font-size: clamp(44px, 3vw, 70px); */
+  font-size: clamp(32px, 3vw, 56px);
   line-height: 1.13;
   font-weight: 500;
-  width: 1200px;
+  /* width: 1200px; */
+  max-width: 600px;
 }
 
 .hero-copy p {
@@ -162,8 +164,9 @@ img {
 .illustration {
   justify-content: center;
   align-items: center;
-  position: absolute;
-  left: 800px;
+  display: flex;
+  /* position: absolute; */
+  /* left: 800px; */
 }
 
 .illustration img {
@@ -1379,4 +1382,35 @@ img {
 
 .form-input::placeholder {
   color: #9a9a9a;
+}
+
+/* // 이메일 + 인증 버튼 레이아웃 // */
+.input-btn-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.input-btn-row .form-input {
+  flex: 1;
+}
+
+/* // 인증 버튼 // */
+.verify-btn {
+  height: 42px;
+  padding: 0 16px;
+  border: 2px solid #3b82f6;
+  border-radius: 8px;
+  background: #fff;
+  color: #3b82f6;
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: .18s background, .18s color;
+}
+
+.verify-btn:hover {
+  background: #3b82f6;
+  color: #fff;
 }

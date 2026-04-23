@@ -6,13 +6,23 @@ function openSignup() {
         <label>Nickname</label><input class="form-input" id="signupName" type="text" />
       </div>
       <div class="form-field">
-        <label>Email address</label><input class="form-input" id="signupEmail" type="text" />
+        <label>Email address</label>
+        <!--인증 버튼 -->
+        <div class="input-btn-row">
+          <input class="form-input" id="signupEmail" type="text" placeholder="example@gmail.com" />
+          <button class="verify-btn" id="verifyEmailBtn">Verify</button>
+        </div>
+        <div class="error-text" id="emailError"></div>
+        <!--인증 코드 입력-->
+        <input class="form-input" id="verifyCode" type="text" placeholder="Enter verification code" />
       </div>
       <div class="form-field">
         <label>Password</label><input class="form-input" id="signupPw" type="password" placeholder="8–16 characters, letters, numbers, and symbols" />
+        <div class="error-text" id="pwError"></div>
       </div>
       <div class="form-field">
         <label>Password Confirm</label><input class="form-input" id="signupPw2" type="password" />
+        <div class="error-text" id="pw2Error"></div>
       </div>
       <div class="check-row">
         <input id="signupAgree" type="checkbox" />
@@ -63,8 +73,19 @@ function openSignin(){
     let html = "";
     html = modalWrapper(`
       <div class="modal-title big">Sign in</div>
-      <div class="form-field"><label>Email address</label><input class="form-input" id="signinEmail"></div>
-      <div class="form-field"><label>Password</label><input class="form-input" id="signinPw" type="password"></div>
+
+      <div class="form-field">
+        <label>Email address</label>
+        <input class="form-input" id="signinEmail">
+        <div class="error-text" id="signinEmailError"></div>
+      </div>
+
+      <div class="form-field">
+        <label>Password</label>
+        <input class="form-input" id="signinPw" type="password">
+        <div class="error-text" id="signinPwError"></div>
+      </div>
+
       <div style="text-align:center;margin-bottom:18px">
         <button class="ghost-btn" id="forgotPw">Did you forget your password?</button>
       </div>
@@ -82,6 +103,10 @@ function eventBind() {
       const pwInput = document.getElementById("signupPw");
       const pw2Input = document.getElementById("signupPw2");
       const agreed = document.getElementById("signupAgree")?.checked;
+
+      const emailError=document.getElementById("emailError")
+      const pwError=document.getElementById("pwError") 
+      const pw2Error=document.getElementById("pw2Error")
 
       const email = emailInput.value.trim();
       const pw = pwInput.value;
@@ -110,7 +135,8 @@ function eventBind() {
       }
       // 비밀번호 검사
       if (!passwordRegex.test(pw)) {
-        pwError.textContent = "Please check the password";
+        // 비밀번호 오류 문구 //
+        pwError.textContent = "Please check the new password";
         isValid = false;
       }
       // 비밀번호 확인 검사
@@ -127,6 +153,22 @@ function eventBind() {
     });
   }
 
+  // 인증 버튼 이벤트 //
+  const verifyEmailBtn = document.getElementById("verifyEmailBtn");
+  if (verifyEmailBtn) {
+    verifyEmailBtn.addEventListener("click", () => {
+      const email = document.getElementById("signupEmail").value.trim();
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      const emailError = document.getElementById("emailError");
+      if (!emailRegex.test(email)) {
+        emailError.textContent = "Please check the email format";
+        return;
+      }
+      emailError.textContent = "";
+      showAlert("Verification email has been sent.");
+    });
+  }
+
   const forgotPw = document.getElementById("forgotPw");
   if (forgotPw) {
     forgotPw.addEventListener("click", () => {
@@ -134,13 +176,48 @@ function eventBind() {
     });
   }
 
-  const signinSubmit = document.getElementById("signinSubmit");
-  if (signinSubmit) {
-    signinSubmit.addEventListener("click", () => {
-      closeModal();
-      window.location.href = "./chat";
-    });
-  }
+const signinSubmit = document.getElementById("signinSubmit");
+if (signinSubmit) {
+  signinSubmit.addEventListener("click", () => {
+    const emailInput = document.getElementById("signinEmail");
+    const pwInput = document.getElementById("signinPw");
+    const emailError = document.getElementById("signinEmailError");
+    const pwError = document.getElementById("signinPwError");
+
+    const email = emailInput.value.trim();
+    const pw = pwInput.value;
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    let isValid = true;
+
+    emailError.textContent = "";
+    pwError.textContent = "";
+
+    emailInput.classList.remove("input-error");
+    pwInput.classList.remove("input-error");
+
+    if (!email) {
+      emailError.textContent = "Please enter your email";
+      emailInput.classList.add("input-error");
+      isValid = false;
+    } else if (!emailRegex.test(email)) {
+      emailError.textContent = "Please check the email format";
+      emailInput.classList.add("input-error");
+      isValid = false;
+    }
+
+    if (!pw) {
+      pwError.textContent = "Please enter your password";
+      pwInput.classList.add("input-error");
+      isValid = false;
+    }
+
+    if (!isValid) return;
+
+    closeModal();
+    window.location.href = "./chat";
+  });
+}
 
   const agreeTerms = document.getElementById("agreeTerms");
   if (agreeTerms) {
