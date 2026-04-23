@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dacare UI</title>
+    <link rel="stylesheet" href="../static/css/styles.css" />
+    <link rel="icon" href="../static/images/favicon.ico" />
+    <script src="../static/js/common.js"></script>
+    <script src="../static/js/main.js"></script>
+  </head>
+  <body>
+    <div id="app">
+      <section class="landing-page">
+        <header class="landing-header">
+          <img class="brand-logo" src="/static/images/dacare_logo.png" alt="Dacare" />
+          <div class="header-actions">
+            <button class="link-btn fancy-btn" onclick="openSignin()">Sign in
+            <span class="star star-1">★</span>
+            <span class="star star-2">★</span>
+            <span class="star star-3">★</span>
+            <span class="star star-4">★</span>
+          </button>
+          <button class="pill-btn fancy-btn" onclick="openSignup()">Sign up
+            <span class="star star-1">★</span>
+            <span class="star star-2">★</span>
+            <span class="star star-3">★</span>
+            <span class="star star-4">★</span>
+          </button>
+          </div>
+        </header>
+
+        <div class="hero-wrap">
+          <div class="hero-copy">
+            <h1>Insurance advice, made simple<br />Get answers from our chatbot</h1>
+            <p>You can inquire about insurance company benefits and procedures.</p>
+          </div>
+          <div class="illustration">
+            <img src="/static/images/main.png" alt="Chatbot illustration" />
+          </div>
+        </div>
+
+        <div class="logo-strip">
+          <img src="/static/images/united_main.png" alt="UnitedHealthcare" />
+          <img src="/static/images/cigna_main.png" alt="Cigna" />
+          <img src="/static/images/tricare_main.png" alt="TRICARE" />
+          <img src="/static/images/msh_main.png" alt="MSH China" />
+        </div>
+      </section>
+    </div>
+    <div id="alert-root"></div>
+    <div id="modal-root"></div>
+  </body>
+</html>
