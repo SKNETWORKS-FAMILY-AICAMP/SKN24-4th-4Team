@@ -1,8 +1,26 @@
-let savedSignupState = null;
+//  이용약관/개인정보 동의 상태와 회원가입 폼 데이터를 전역 변수로 보존
+window.__agreements = window.__agreements || { terms: false, privacy: false };
+window.__signupFormData = window.__signupFormData || { name: '', email: '', verifyCode: '', pw: '', pw2: '' };
 
+// 이용약관 팝업 열기 전 현재 폼 데이터를 전역 변수에 저장하는 함수
+function saveSignupData() {
+  window.__signupFormData = {
+    name: document.getElementById('signupName')?.value || '',
+    email: document.getElementById('signupEmail')?.value || '',
+    verifyCode: document.getElementById('verifyCode')?.value || '',
+    pw: document.getElementById('signupPw')?.value || '',
+    pw2: document.getElementById('signupPw2')?.value || '',
+  };
+}
+
+// 수정-> openSignup: 단일 체크박스 -> 이용약관/개인정보 각각 분리된 2개 체크박스
+// 수정-> 이용약관 팝업에서 돌아올 때 폼 데이터 및 동의 상태를 복원
 function openSignup() {
-  let html = "";
-  html = modalWrapper(`
+  const d = window.__signupFormData;
+  // 팝업에서 두 항목 모두 동의했으면 단일 체크박스를 미리 체크 상태로 렌더링
+  const allAgreed = (window.__agreements.terms && window.__agreements.privacy) ? 'checked' : '';
+
+  let html = modalWrapper(`
       <div class="modal-title big">Sign up</div>
       <div class="form-field">
         <label>Nickname</label><input class="form-input" id="signupName" type="text" />
@@ -27,61 +45,106 @@ function openSignup() {
         <div class="error-text" id="pw2Error"></div>
       </div>
       <div class="check-row">
-        <input id="signupAgree" type="checkbox" />
-        <span>I agree to <button class="linklike" onclick="openTerms()">Terms and Conditions (Required)</button></span>
+        <input id="signupAgree" type="checkbox" ${allAgreed} />
+        <span>[Required] I agree to all <button class="linklike" onclick="saveSignupData();openTerms()">Terms &amp; Privacy Policy (View)</button></span>
       </div>
       <div style="text-align:center">
         <button class="primary-btn" id="signupSubmit">Sign up</button>
       </div>
     `, "medium");
-    openModal(html);
-    eventBind();
+  openModal(html);
+
+  // 이용약관 팝업 → 회원가입 폼 복귀 시 입력 데이터 복원
+  const nameEl = document.getElementById('signupName');
+  const emailEl = document.getElementById('signupEmail');
+  const verifyEl = document.getElementById('verifyCode');
+  const pwEl = document.getElementById('signupPw');
+  const pw2El = document.getElementById('signupPw2');
+  if (nameEl && d.name) nameEl.value = d.name;
+  if (emailEl && d.email) emailEl.value = d.email;
+  if (verifyEl && d.verifyCode) verifyEl.value = d.verifyCode;
+  if (pwEl && d.pw) pwEl.value = d.pw;
+  if (pw2El && d.pw2) pw2El.value = d.pw2;
+
+  eventBind();
 }
 
-function openTerms(){
-  savedSignupState = {
-    name:       document.getElementById("signupName")?.value  || "",
-    email:      document.getElementById("signupEmail")?.value || "",
-    verifyCode: document.getElementById("verifyCode")?.value  || "",
-    pw:         document.getElementById("signupPw")?.value    || "",
-    pw2:        document.getElementById("signupPw2")?.value   || "",
-  };
+// 수정: openTerms ->단일 내용 박스 -> 이용약관/개인정보 각각 독립 체크박스 포함
+// 수정: 내용을 실제 이용약관/개인정보 처리방침으로 교체 (영문)
+// 수정: Agree 버튼 -> 두 체크박스 모두 체크해야 활성화
+function openTerms() {
+  let html = modalWrapper(`
+        <div class="modal-title">Terms &amp; Privacy Policy</div>
 
-  let html = "";
-  html = modalWrapper(`
-        <div class="modal-title">Terms and Conditions</div>
-      <div class="terms-box">
-        <strong>1. Privacy Policy</strong><br /><br />
-        Privacy Policy<br />
-        Last Updated: [DATE]<br /><br />
-        We respect your privacy and are committed to protecting your personal data. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our service.<br /><br />
-        1. Information We Collect<br />
-        - Personal Information: name, email address, contact information<br />
-        - Usage Data: IP address, browser type, device information, pages visited<br />
-        - Input Data: any information you provide through the chatbot or forms
+      <div class="terms-section-label">[Required] Terms of Service</div>
+      <div class="terms-box scrollable">
+        <strong>Article 1 (Purpose)</strong><br />
+        These Terms govern the rights, obligations, and responsibilities of users and DACRE when using the AI chatbot and related services provided by DACRE.<br /><br />
+        <strong>Article 2 (Member Registration and Account Management)</strong><br />
+        1. Users apply for membership by completing the registration form and agreeing to these Terms.<br />
+        2. Members are responsible for managing their own ID and password and must not allow third parties to use them. Suspected unauthorized use must be reported to the service immediately.<br />
+        3. Members may request account deletion at any time, and the service will process it promptly.<br /><br />
+        <strong>Article 3 (AI Service Use and Disclaimer)</strong><br />
+        1. This service is an AI chatbot based on a large language model (LLM). Answers are generated from trained data and do not guarantee completeness, accuracy, or currency of information.<br />
+        2. Answers on specialized topics (e.g., insurance products, historical facts) are for reference only and cannot serve as legally binding advice or evidence. Users must verify accuracy independently.<br />
+        3. The service is not liable for damages caused by incorrect answers (hallucinations) or inappropriate responses due to AI technical limitations, unless there is intentional or gross negligence.<br /><br />
+        <strong>Article 4 (User Obligations and Prohibited Activities)</strong><br />
+        Users must not engage in the following activities:<br />
+        1. Theft of others&#39; information or registration of false facts<br />
+        2. Exploiting AI model vulnerabilities to overload the system or induce abnormal responses (e.g., prompt injection)<br />
+        3. Entering sensitive personal information of oneself or third parties in the chat window<br />
+        4. Infringing on the service&#39;s intellectual property rights or interfering with its operations
       </div>
-      <div class="terms-box">
-        <strong>2. Terms of Service </strong><br /><br />
-        Terms of Service<br />
-        Last Updated: [DATE]<br /><br />
-        By using our service, you agree to the following terms.<br /><br />
-        1. Use of Service<br />
-        You agree to use the service only for lawful purposes and in accordance with these Terms.<br /><br />
-        2. Service Description<br />
-        We provide an AI-based chatbot for informational purposes. The information provided is not professional advice.
+      <div class="check-row terms-check-row">
+        <input id="termsCheck" type="checkbox" />
+        <span>[Required] I agree to the Terms of Service</span>
       </div>
+
+      <div class="terms-section-label">[Required] Privacy Policy Collection &amp; Use</div>
+      <div class="terms-box scrollable">
+        DACRE collects the minimum personal information necessary for service provision and strives to protect the rights and interests of users.<br /><br />
+        <table class="terms-table">
+          <thead>
+            <tr><th>Items Collected</th><th>Purpose</th><th>Retention Period</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Email address, password, nickname</td>
+              <td>Member registration, identity verification, service guidance</td>
+              <td>Until membership withdrawal</td>
+            </tr>
+            <tr>
+              <td>Chatbot conversation records</td>
+              <td>AI response optimization (RAG), service quality improvement &amp; error correction</td>
+              <td>Until withdrawal or purpose achieved</td>
+            </tr>
+            <tr>
+              <td>Access IP, cookies, service usage records</td>
+              <td>Fraud prevention &amp; service analytics</td>
+              <td>6 months (pursuant to applicable laws)</td>
+            </tr>
+          </tbody>
+        </table>
+        <br />
+        <strong>Right to Refuse Consent</strong><br />
+        Users have the right to refuse consent for the collection and use of personal information. However, refusal to consent to required items may restrict membership registration and service use.
+      </div>
+      <div class="check-row terms-check-row">
+        <input id="privacyCheck" type="checkbox" />
+        <span>[Required] I agree to the Privacy Policy Collection &amp; Use</span>
+      </div>
+
       <div class="modal-actions">
-        <button class="primary-btn" id="agreeTerms">Agree</button>
+        <button class="primary-btn" id="agreeTerms" disabled>Agree</button>
         <button class="secondary-btn" data-close>Cancel</button>
       </div>
     `, "large");
-    openModal(html);
-    eventBind();
+  openModal(html);
+  eventBind();
 }
 
-function openSignin(){
-    let html = "";
-    html = modalWrapper(`
+function openSignin() {
+  let html = modalWrapper(`
       <div class="modal-title big">Sign in</div>
 
       <div class="form-field">
@@ -101,8 +164,8 @@ function openSignin(){
       </div>
       <div style="text-align:center"><button class="primary-btn" id="signinSubmit">Sign in</button></div>
     `, "medium");
-    openModal(html);
-    eventBind();
+  openModal(html);
+  eventBind();
 }
 
 function eventBind() {
@@ -144,7 +207,7 @@ function eventBind() {
       const pw = document.getElementById("signupPw")?.value;
       const val = signupPw2Input.value;
       if (val && val !== pw) {
-        pw2Error.textContent = "Password does not match."; //  문구 변경 수정
+        pw2Error.textContent = "Password does not match.";
         signupPw2Input.classList.add("input-error");
       } else {
         pw2Error.textContent = "";
@@ -153,7 +216,7 @@ function eventBind() {
     });
   }
 
-  // Sign In 이메일 실시간 유효성 검사 —> 유효하면 오류 문구 즉시 제거 추가
+  // Sign In 이메일 실시간 유효성 검사
   const signinEmailInput = document.getElementById("signinEmail");
   if (signinEmailInput) {
     signinEmailInput.addEventListener("input", () => {
@@ -169,7 +232,7 @@ function eventBind() {
     });
   }
 
-  //  Sign In 비밀번호 실시간 유효성 검사 — > 입력하면 오류 문구 즉시 제거 추가
+  // Sign In 비밀번호 실시간 유효성 검사
   const signinPwInput = document.getElementById("signinPw");
   if (signinPwInput) {
     signinPwInput.addEventListener("input", () => {
@@ -187,13 +250,16 @@ function eventBind() {
       const emailInput = document.getElementById("signupEmail");
       const pwInput = document.getElementById("signupPw");
       const pw2Input = document.getElementById("signupPw2");
+      const agreed = document.getElementById("signupAgree")?.checked;
 
       const name = document.getElementById("signupName").value.trim();
       const email = emailInput.value.trim();
-      const verifyCode = document.getElementById("verifyCode").value.trim();
+      const verifyCode = document.getElementById("verifyCode")?.value.trim() || "";
       const pw = pwInput.value;
       const pw2 = pw2Input.value;
-      const agreed = document.getElementById("signupAgree")?.checked;
+
+      // 약관 동의 미체크 시 제출 차단
+      if (!agreed) return showAlert("Please agree to the Terms &amp; Privacy Policy.");
 
       try {
         await apiRequest("/auth/signup/", "POST", {
@@ -205,6 +271,9 @@ function eventBind() {
           agree_terms: agreed
         });
 
+        // 회원가입 완료 시 전역 상태 초기화
+        window.__agreements = { terms: false, privacy: false };
+        window.__signupFormData = { name: '', email: '', verifyCode: '', pw: '', pw2: '' };
         closeModal();
         showAlert("Registration completed successfully.");
         window.location.href = "./chat";
@@ -239,73 +308,55 @@ function eventBind() {
       }
     });
   }
+
   const forgotPw = document.getElementById("forgotPw");
   if (forgotPw) {
     forgotPw.addEventListener("click", async () => {
-
       const email = document.getElementById("signinEmail").value.trim();
-
       try {
         await apiRequest("/auth/password/temp/", "POST", {
           user_email: email
         });
-
         showAlert("A temporary password has been sent to your email.");
-
       } catch(e){}
     });
   }
 
-const signinSubmit = document.getElementById("signinSubmit");
-if (signinSubmit) {
-  signinSubmit.addEventListener("click", async () => {
-    const email = document.getElementById("signinEmail").value.trim();
-    const pw = document.getElementById("signinPw").value;
-
-    try {
-      const res = await apiRequest("/auth/login/", "POST", {
-        user_email: email,
-        user_pw: pw
-      });
-
-      closeModal();
-
-      window.location.href = "./chat";
-
-    } catch(e){}
-  });
-}
-
-  const agreeTerms = document.getElementById("agreeTerms");
-  if (agreeTerms) {
-    agreeTerms.addEventListener("click", () => {
-      // 수정 closeModal() 대신 openSignup()으로 회원가입 폼 복귀 후 체크박스 체크
-      // closeModal(); -> 모달이 닫혀 signupAgree 요소가 없어서 체크 불가했음
-      openSignup();
-
-      // 이용약관 열기 전 저장해 둔 입력값 복원
-      if (savedSignupState) {
-        const f = savedSignupState;
-        const get = (id) => document.getElementById(id);
-        if (get("signupName"))  get("signupName").value  = f.name;
-        if (get("signupEmail")) get("signupEmail").value = f.email;
-        if (get("verifyCode"))  get("verifyCode").value  = f.verifyCode;
-        if (get("signupPw"))    get("signupPw").value    = f.pw;
-        if (get("signupPw2"))   get("signupPw2").value   = f.pw2;
-
-        // 닉네임 x -> 팝업 표시 후 체크박스 체크 없이 복귀
-        if (!f.name.trim()) {
-          savedSignupState = null;
-          showAlert("Please enter a nickname to continue.");
-          return;
-        }
-
-        savedSignupState = null;
-      }
-
-      const agreeCheckbox = document.getElementById("signupAgree");
-      if (agreeCheckbox) agreeCheckbox.checked = true;
+  const signinSubmit = document.getElementById("signinSubmit");
+  if (signinSubmit) {
+    signinSubmit.addEventListener("click", async () => {
+      const email = document.getElementById("signinEmail").value.trim();
+      const pw = document.getElementById("signinPw").value;
+      try {
+        await apiRequest("/auth/login/", "POST", {
+          user_email: email,
+          user_pw: pw
+        });
+        closeModal();
+        window.location.href = "./chat";
+      } catch(e){}
     });
   }
 
+  // 이용약관 팝업 내 체크박스 이벤트: 두 박스 모두 체크 시 Agree 버튼 활성화
+  const termsCheck = document.getElementById("termsCheck");
+  const privacyCheck = document.getElementById("privacyCheck");
+  const agreeTermsBtn = document.getElementById("agreeTerms");
+
+  function updateAgreeButton() {
+    if (agreeTermsBtn) {
+      agreeTermsBtn.disabled = !(termsCheck?.checked && privacyCheck?.checked);
+    }
+  }
+
+  if (termsCheck) termsCheck.addEventListener("change", updateAgreeButton);
+  if (privacyCheck) privacyCheck.addEventListener("change", updateAgreeButton);
+
+  // 수정: agreeTerms 클릭 시 -> 전역 동의 상태 저장 후 openSignup 재오픈
+  if (agreeTermsBtn) {
+    agreeTermsBtn.addEventListener("click", () => {
+      window.__agreements = { terms: true, privacy: true };
+      openSignup(); // 두 항목 모두 동의 -> 단일 체크박스 체크 상태로 회원가입 모달 재오픈
+    });
+  }
 }

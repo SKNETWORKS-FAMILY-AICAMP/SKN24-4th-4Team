@@ -911,6 +911,56 @@ img {
   padding: 0;
 }
 
+/* [추가] 이용약관 팝업 내 섹션 헤더 (이용약관 / 개인정보 각 섹션 구분) */
+.terms-section-label {
+  font-size: 13px;
+  font-weight: 700;
+  margin: 8px 0 6px;
+  color: #2d3748;
+}
+
+/* [추가] 이용약관 내용 박스에 스크롤 적용 (긴 내용 표시용) */
+.terms-box.scrollable {
+  max-height: 180px;
+  overflow-y: auto;
+}
+
+/* [추가] 이용약관 팝업 내 체크박스 행 여백 조정 */
+.check-row.terms-check-row {
+  margin: 6px 0 14px;
+}
+
+/* [추가] 에러 메시지 표시용 span */
+.field-error {
+  display: block;
+  font-size: 11px;
+  color: #e53e3e;
+  margin-top: 4px;
+  min-height: 14px;
+}
+
+/* [추가] 개인정보 수집 항목 테이블 스타일 */
+.terms-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11px;
+  margin-top: 6px;
+}
+
+.terms-table th,
+.terms-table td {
+  border: 1px solid #c7c7c7;
+  padding: 5px 7px;
+  text-align: left;
+  vertical-align: top;
+  line-height: 1.4;
+}
+
+.terms-table thead tr {
+  background: #f5f5f5;
+  font-weight: 700;
+}
+
 .modal-actions {
   display: flex;
   justify-content: center;
