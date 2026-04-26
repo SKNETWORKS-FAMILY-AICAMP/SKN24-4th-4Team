@@ -781,6 +781,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
   eventBind();
 
+  // 세션 연장 타이머 시작
+  startSessionTimer();
+
   if (loginUser.is_temp_pw === "Y") {
     setTimeout(() => {
       openForceChangePasswordModal();
