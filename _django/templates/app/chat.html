@@ -11,6 +11,7 @@
   <script src="../static/js/chat.js"></script>
 </head>
 <body>
+{{ user_info|json_script:"user-info" }}
   <div id="app">
     <section class="app-shell">
       <aside class="sidebar">
@@ -44,7 +45,8 @@
 
         <div class="side-footer">
           <button class="side-footer-user" onclick="openProfile()">
-            <img src="/static/images/cogwheel.png" alt=""> User Name
+            <img src="/static/images/cogwheel.png" alt="">
+            <span id="sidebarUserName">{{ user_info.user_nk|default:"User Name" }}</span>
           </button>
           <button class="side-footer-feedback" onclick="openFeedback()">Feedback</button>
         </div>

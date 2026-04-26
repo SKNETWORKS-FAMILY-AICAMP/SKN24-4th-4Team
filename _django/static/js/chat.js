@@ -1,3 +1,22 @@
+const userInfoEl = document.getElementById("user-info");
+
+let loginUser = {
+  user_id: null,
+  user_email: "",
+  user_nk: "User Name",
+  is_temp_pw: "N"
+};
+
+function loadLoginUserFromTemplate() {
+  const userInfoEl = document.getElementById("user-info");
+
+  if (userInfoEl) {
+    loginUser = JSON.parse(userInfoEl.textContent);
+  }
+
+  console.log("loginUser:", loginUser);
+}
+
 const chatState = {
   insurance: new URLSearchParams(location.search).get("insurance"),
   suggestion: "",
@@ -196,50 +215,253 @@ function addUserMessage(message) {
     </div>`);
 }
 
-function openProfile(){
-  // 기존 사용자 정보 불러오는 로직 추가
-  let html = "";
-  html = modalWrapper(`
+function openProfile() {
+  const html = modalWrapper(`
     <div class="modal-title">User Information</div>
+
     <div class="form-field">
-      <label>Nick Name</label><input class="form-input" value="" />
+      <label>Nick Name</label>
+      <input class="form-input" id="profileNickname" value="${loginUser.user_nk || ""}" />
+      <div class="error-text" id="profileNicknameError"></div>
     </div>
+
     <div class="form-field">
-      <label>Email address</label><input class="form-input gray" value="user@example.com" disabled />
+      <label>Email address</label>
+      <input class="form-input gray" id="profileEmail" value="${loginUser.user_email || ""}" disabled />
     </div>
+
     <div class="hr"></div>
+
     <div class="form-field">
-      <label>Password</label><input class="form-input" type="password" />
+      <label>Password</label>
+      <input class="form-input" id="profileCurrentPw" type="password" />
+      <div class="error-text" id="profileCurrentPwError"></div>
     </div>
+
     <div class="form-field">
-      <label>New Password</label><input class="form-input" type="password" />
+      <label>New Password</label>
+      <input class="form-input" id="profileNewPw" type="password" placeholder="8–16 characters, letters, numbers and symbols" />
+      <div class="error-text" id="profileNewPwError"></div>
     </div>
+
     <div class="form-field">
-      <label>New Password Confirm</label><input class="form-input" type="password" />
+      <label>New Password Confirm</label>
+      <input class="form-input" id="profileNewPwConfirm" type="password" />
+      <div class="error-text" id="profileNewPwConfirmError"></div>
     </div>
+
     <div style="text-align:center">
       <button class="primary-btn" id="saveProfile">Save</button>
     </div>
+
+    <div style="text-align:center">
+      <button type="button" id="deleteAccountBtn" style="margin-top:10px;font-size:10px;color:gray;text-decoration:underline;background:none;border:0;cursor:pointer;">
+        Delete Account
+      </button>
+    </div>
   `, "medium");
+
   openModal(html);
+
+  const nicknameRegex = /^[A-Za-z0-9]{1,50}$/;
+  const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[!@#$%^&*()_\-+=\[{\]};:'",<.>/?\\|`~]).{8,16}$/;
+
+  const nicknameInput = document.getElementById("profileNickname");
+  const currentPwInput = document.getElementById("profileCurrentPw");
+  const newPwInput = document.getElementById("profileNewPw");
+  const newPwConfirmInput = document.getElementById("profileNewPwConfirm");
+
+  const nicknameError = document.getElementById("profileNicknameError");
+  const currentPwError = document.getElementById("profileCurrentPwError");
+  const newPwError = document.getElementById("profileNewPwError");
+  const newPwConfirmError = document.getElementById("profileNewPwConfirmError");
+
+  nicknameInput.addEventListener("input", () => {
+    if (nicknameInput.value && !nicknameRegex.test(nicknameInput.value.trim())) {
+      nicknameError.textContent = "Please enter a nickname to continue";
+      nicknameInput.classList.add("input-error");
+    } else {
+      nicknameError.textContent = "";
+      nicknameInput.classList.remove("input-error");
+    }
+  });
+
+  newPwInput.addEventListener("input", () => {
+    if (newPwInput.value && !passwordRegex.test(newPwInput.value)) {
+      newPwError.textContent = "Please check the new password";
+      newPwInput.classList.add("input-error");
+    } else {
+      newPwError.textContent = "";
+      newPwInput.classList.remove("input-error");
+    }
+  });
+
+  newPwConfirmInput.addEventListener("input", () => {
+    if (newPwConfirmInput.value && newPwConfirmInput.value !== newPwInput.value) {
+      newPwConfirmError.textContent = "Password does not match";
+      newPwConfirmInput.classList.add("input-error");
+    } else {
+      newPwConfirmError.textContent = "";
+      newPwConfirmInput.classList.remove("input-error");
+    }
+  });
+
+  document.getElementById("saveProfile").addEventListener("click", async () => {
+    const nickname = nicknameInput.value.trim();
+    const currentPw = currentPwInput.value;
+    const newPw = newPwInput.value;
+    const newPwConfirm = newPwConfirmInput.value;
+
+    nicknameError.textContent = "";
+    currentPwError.textContent = "";
+    newPwError.textContent = "";
+    newPwConfirmError.textContent = "";
+
+    nicknameInput.classList.remove("input-error");
+    currentPwInput.classList.remove("input-error");
+    newPwInput.classList.remove("input-error");
+    newPwConfirmInput.classList.remove("input-error");
+
+    if (!nicknameRegex.test(nickname)) {
+      nicknameError.textContent = "Please enter a nickname to continue";
+      nicknameInput.classList.add("input-error");
+      return;
+    }
+
+    const wantsPasswordChange = currentPw || newPw || newPwConfirm;
+
+    if (wantsPasswordChange) {
+      if (!currentPw) {
+        currentPwError.textContent = "Please check the password";
+        currentPwInput.classList.add("input-error");
+        return;
+      }
+
+      if (!passwordRegex.test(newPw)) {
+        newPwError.textContent = "Please check the new password";
+        newPwInput.classList.add("input-error");
+        return;
+      }
+
+      if (newPw !== newPwConfirm) {
+        newPwConfirmError.textContent = "Password does not match";
+        newPwConfirmInput.classList.add("input-error");
+        return;
+      }
+    }
+
+    try {
+      await apiRequest("/user/nickname/", "POST", {
+        user_nk: nickname
+      });
+
+      loginUser.user_nk = nickname;
+
+      const userNameEl = document.getElementById("sidebarUserName");
+      if (userNameEl) userNameEl.textContent = nickname;
+
+      if (wantsPasswordChange) {
+        await apiRequest("/user/password/", "POST", {
+          current_pw: currentPw,
+          new_pw: newPw,
+          new_pw_confirm: newPwConfirm
+        });
+
+        loginUser.is_temp_pw = "N";
+      }
+
+      closeModal();
+      showAlert("User information saved.");
+    } catch (e) {
+      console.error(e);
+    }
+  });
+
+  document.getElementById("deleteAccountBtn").addEventListener("click", () => {
+    openAlertSelect("Are you sure you want to delete your account?", "confirmWithdraw");
+  });
 }
-function openFeedback(){
-  let html = "";
-  html = modalWrapper(`
+
+async function confirmWithdraw() {
+  try {
+    await apiRequest("/user/withdraw/", "POST");
+    closeAlert();
+    closeModal();
+    window.location.href = "/dacare/";
+  } catch (e) {
+    console.error(e);
+  }
+}
+
+function openFeedback() {
+  const html = modalWrapper(`
     <div class="modal-title">Please give us feedback</div>
-    <button class="option-btn o1" data-rate="very satisfied">very satisfied</button>
-    <button class="option-btn o2" data-rate="satisfied">satisfied</button>
-    <button class="option-btn o3" data-rate="average">average</button>
-    <button class="option-btn o4" data-rate="dissatisfied">dissatisfied</button>
-    <button class="option-btn o5" data-rate="very dissatisfied">very dissatisfied</button>
-    <div style="font-size:12px;margin:14px 0 10px">Please leave us valuable comments. It's a great help!</div>
-    <textarea class="form-textarea" id="feedbackText"></textarea>
+
+    <button class="option-btn o1" data-rate="5">very satisfied</button>
+    <button class="option-btn o2" data-rate="4">satisfied</button>
+    <button class="option-btn o3" data-rate="3">average</button>
+    <button class="option-btn o4" data-rate="2">dissatisfied</button>
+    <button class="option-btn o5" data-rate="1">very dissatisfied</button>
+
+    <div class="error-text" id="feedbackRatingError"></div>
+
+    <div style="font-size:12px;margin:14px 0 10px">
+      Please leave us valuable comments. It's a great help!
+    </div>
+
+    <textarea class="form-textarea" id="feedbackText" maxlength="1000"></textarea>
+    <div class="error-text" id="feedbackTextError"></div>
+
     <div style="height:18px"></div>
+
     <div style="text-align:center">
       <button class="primary-btn" id="feedbackSubmit">Submit</button>
     </div>
   `, "medium");
+
   openModal(html);
+
+  let selectedRating = null;
+
+  document.querySelectorAll("[data-rate]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll("[data-rate]").forEach((x) => x.classList.remove("active"));
+      btn.classList.add("active");
+      selectedRating = Number(btn.dataset.rate);
+      document.getElementById("feedbackRatingError").textContent = "";
+    });
+  });
+
+  document.getElementById("feedbackSubmit").addEventListener("click", async () => {
+    const feedbackText = document.getElementById("feedbackText").value.trim();
+    const ratingError = document.getElementById("feedbackRatingError");
+    const textError = document.getElementById("feedbackTextError");
+
+    ratingError.textContent = "";
+    textError.textContent = "";
+
+    if (!selectedRating) {
+      ratingError.textContent = "Please select a satisfaction level.";
+      return;
+    }
+
+    if (feedbackText.length > 1000) {
+      textError.textContent = "Feedback must be within 1000 characters.";
+      return;
+    }
+
+    try {
+      await apiRequest("/feedback/create/", "POST", {
+        satisfaction_level: selectedRating,
+        feedback_content: feedbackText
+      });
+
+      closeModal();
+      showAlert("Feedback submitted successfully.");
+    } catch (e) {
+      console.error(e);
+    }
+  });
 }
 
 function renderInsuranceChat() {
@@ -305,9 +527,13 @@ function renderCompareScreen(){
           <button class="topic-chip" data-topic="Direct Billing Network Availability">Direct Billing Network Availability</button>
         </div>
       </section>
-      ${renderBottomInput()}
     `;
-    const chips = document.querySelectorAll('.topic-chip');
+    renderBottomInput()
+    eventCompareBind()
+}
+
+function eventCompareBind() {
+  const chips = document.querySelectorAll('.topic-chip');
 
     chips.forEach((chip) => {
       chip.addEventListener('click', () => {
@@ -379,6 +605,9 @@ TRICARE_Overseas_Program_Handbook.pdf p.42, MSH_International_Policy_Rules_V8.pd
           </table>
         </div>`;
     });
+}
+
+function compareTableAppend() {
 
 }
 
@@ -423,16 +652,138 @@ function deleteHistory() {
   closeAlert();
 }
 
+function openForceChangePasswordModal() {
+  const html = modalWrapper(`
+    <div class="modal-title">Change password</div>
+
+    <div class="form-field">
+      <label>Password</label>
+      <input class="form-input" id="tempCurrentPw" type="password">
+      <div class="error-text" id="tempCurrentPwError"></div>
+    </div>
+
+    <div class="form-field">
+      <label>New Password</label>
+      <input class="form-input" id="tempNewPw" type="password" placeholder="8–16 characters, letters, numbers and symbols">
+      <div class="error-text" id="tempNewPwError"></div>
+    </div>
+
+    <div class="form-field">
+      <label>New Password Confirm</label>
+      <input class="form-input" id="tempNewPwConfirm" type="password">
+      <div class="error-text" id="tempNewPwConfirmError"></div>
+    </div>
+
+    <div style="text-align:center">
+      <button class="primary-btn" id="forcePasswordSave">Save</button>
+    </div>
+  `, "medium", false);
+
+  openModal(html);
+  showAlert("Please change your temporary password to continue using the service.");
+
+  const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[!@#$%^&*()_\-+=\[{\]};:'",<.>/?\\|`~]).{8,16}$/;
+
+  const currentPwInput = document.getElementById("tempCurrentPw");
+  const newPwInput = document.getElementById("tempNewPw");
+  const newPwConfirmInput = document.getElementById("tempNewPwConfirm");
+
+  const currentPwError = document.getElementById("tempCurrentPwError");
+  const newPwError = document.getElementById("tempNewPwError");
+  const newPwConfirmError = document.getElementById("tempNewPwConfirmError");
+
+  newPwInput.addEventListener("input", () => {
+    if (newPwInput.value && !passwordRegex.test(newPwInput.value)) {
+      newPwError.textContent = "Please check the new password";
+      newPwInput.classList.add("input-error");
+    } else {
+      newPwError.textContent = "";
+      newPwInput.classList.remove("input-error");
+    }
+  });
+
+  newPwConfirmInput.addEventListener("input", () => {
+    if (newPwConfirmInput.value && newPwConfirmInput.value !== newPwInput.value) {
+      newPwConfirmError.textContent = "Password does not match";
+      newPwConfirmInput.classList.add("input-error");
+    } else {
+      newPwConfirmError.textContent = "";
+      newPwConfirmInput.classList.remove("input-error");
+    }
+  });
+
+  document.getElementById("forcePasswordSave").addEventListener("click", async () => {
+    const currentPw = currentPwInput.value;
+    const newPw = newPwInput.value;
+    const newPwConfirm = newPwConfirmInput.value;
+
+    currentPwError.textContent = "";
+    newPwError.textContent = "";
+    newPwConfirmError.textContent = "";
+
+    currentPwInput.classList.remove("input-error");
+    newPwInput.classList.remove("input-error");
+    newPwConfirmInput.classList.remove("input-error");
+
+    if (!currentPw) {
+      currentPwError.textContent = "Please check the password";
+      currentPwInput.classList.add("input-error");
+      return;
+    }
+
+    if (!passwordRegex.test(newPw)) {
+      newPwError.textContent = "Please check the new password";
+      newPwInput.classList.add("input-error");
+      return;
+    }
+
+    if (newPw !== newPwConfirm) {
+      newPwConfirmError.textContent = "Password does not match";
+      newPwConfirmInput.classList.add("input-error");
+      return;
+    }
+
+    try {
+      await apiRequest("/user/password/", "POST", {
+        current_pw: currentPw,
+        new_pw: newPw,
+        new_pw_confirm: newPwConfirm
+      });
+
+      loginUser.is_temp_pw = "N";
+      closeModal();
+      showAlert("Password updated successfully.");
+    } catch (e) {
+      console.error(e);
+    }
+  });
+}
+
+
+
 document.addEventListener("DOMContentLoaded", () => {
+  loadLoginUserFromTemplate();
+
+  const userNameEl = document.getElementById("sidebarUserName");
+
+  if (userNameEl) {
+    userNameEl.textContent = loginUser.user_nk || "User Name";
+  }
+
   if (chatState.insurance) {
     $(".dropdown-trigger").removeClass("hidden");
     renderInsuranceChat();
-  } else if(chatState.compare) {
+  } else if (chatState.compare) {
     renderCompareScreen();
   } else {
-    renderSelectCardScreen()
+    renderSelectCardScreen();
   }
+
   eventBind();
+
+  if (loginUser.is_temp_pw === "Y") {
+    setTimeout(() => {
+      openForceChangePasswordModal();
+    }, 300);
+  }
 });
-
-

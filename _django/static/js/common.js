@@ -1,8 +1,42 @@
-function modalWrapper(inner, size = "medium") {
+let sessionTimer = null;
+
+function startSessionTimer() {
+  clearTimeout(sessionTimer);
+
+  // 로그인 후 25분 뒤 세션 연장 안내
+  sessionTimer = setTimeout(() => {
+    openAlertSelect(
+      "Your session will expire soon. Would you like to extend it?",
+      "extendSession"
+    );
+  }, 25 * 60 * 1000);
+}
+
+async function extendSession() {
+  try {
+    await apiRequest("/session/extend/", "POST");
+
+    closeAlert();
+    showAlert("Session extended.");
+
+    // 다시 25분 카운트 시작
+    startSessionTimer();
+  } catch (e) {
+    console.error(e);
+    closeAlert();
+    showAlert("Session expired. Please log in again.");
+
+    setTimeout(() => {
+      window.location.href = "/dacare/";
+    }, 1000);
+  }
+}
+
+function modalWrapper(inner, size = "medium", close=true) {
   return `
     <div class="backdrop" data-close></div>
     <section class="modal ${size}">
-      <button class="close-btn" data-close><img src="/static/images/close.png" alt="close"></button>
+      ${close ? '<button class="close-btn" data-close><img src="/static/images/close.png" alt="close"></button>' : ''}
       ${inner}
     </section>
   `;
@@ -120,4 +154,39 @@ function logout() {
 function confirmLogout() {
   closeAlert(); // 세션 만료 function 추가
   window.location.href = "./";
+}
+
+async function apiRequest(url, method = "GET", body = null) {
+  try {
+    const res = await fetch(`/dacare${url}`, {
+      method,
+      headers: { "Content-Type": "application/json" },
+      body: body ? JSON.stringify(body) : null
+    });
+
+    const data = await res.json();
+
+    if (!data.success) {
+      showAlert(data.message);
+      throw data;
+    }
+
+    return data.data;
+
+  } catch (e) {
+    console.error(e);
+    throw e;
+  }
+}
+
+// 로그아웃
+function logout() {
+  openAlertSelect("Do you want to log out?", "confirmLogout");
+}
+
+function confirmLogout() {
+  apiRequest("/auth/logout/", "POST")
+    .then(() => {
+      window.location.href = "./";
+    });
 }

@@ -1,4 +1,3 @@
-// [추가] 이용약관 열기 전 회원가입 폼 입력값을 임시 저장하는 변수
 let savedSignupState = null;
 
 function openSignup() {
@@ -16,7 +15,7 @@ function openSignup() {
           <button class="verify-btn" id="verifyEmailBtn">Verify</button>
         </div>
         <div class="error-text" id="emailError"></div>
-        <!--인증 코드 입력-->
+        <!--인증 코드-->
         <input class="form-input" id="verifyCode" type="text" placeholder="Enter verification code" />
       </div>
       <div class="form-field">
@@ -40,7 +39,6 @@ function openSignup() {
 }
 
 function openTerms(){
-  // 이용약관으로 이동하기 전 현재 폼 입력값을 저장 —> 돌아올 때 복원하기 위함 추가
   savedSignupState = {
     name:       document.getElementById("signupName")?.value  || "",
     email:      document.getElementById("signupEmail")?.value || "",
@@ -108,11 +106,9 @@ function openSignin(){
 }
 
 function eventBind() {
-  //  정규식을 함수 상단으로 이동 — 실시간 검사 리스너와 제출 핸들러가 공유 추가함
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[!@#$%^&*()_\-+=\[{\]};:'",<.>/?\\|`~]).{8,16}$/;
 
-  //  Sign Up 이메일 실시간 유효성 검사 — 유효하면 오류 문구 즉시 제거 추가함
   const signupEmailInput = document.getElementById("signupEmail");
   if (signupEmailInput) {
     signupEmailInput.addEventListener("input", () => {
@@ -126,7 +122,7 @@ function eventBind() {
     });
   }
 
-  //  Sign Up 비밀번호 실시간 유효성 검사 — 조건 충족 시 오류 문구 즉시 제거 추가
+  // 조건 충족 시 오류 문구 즉시 제거
   const signupPwInput = document.getElementById("signupPw");
   if (signupPwInput) {
     signupPwInput.addEventListener("input", () => {
@@ -187,126 +183,96 @@ function eventBind() {
 
   const signupSubmit = document.getElementById("signupSubmit");
   if (signupSubmit) {
-    signupSubmit.addEventListener("click", () => {
+    signupSubmit.addEventListener("click", async () => {
       const emailInput = document.getElementById("signupEmail");
       const pwInput = document.getElementById("signupPw");
       const pw2Input = document.getElementById("signupPw2");
-      const agreed = document.getElementById("signupAgree")?.checked;
 
-      const emailError=document.getElementById("emailError")
-      const pwError=document.getElementById("pwError")
-      const pw2Error=document.getElementById("pw2Error")
-
+      const name = document.getElementById("signupName").value.trim();
       const email = emailInput.value.trim();
+      const verifyCode = document.getElementById("verifyCode").value.trim();
       const pw = pwInput.value;
       const pw2 = pw2Input.value;
+      const agreed = document.getElementById("signupAgree")?.checked;
 
-      // 초기화
-      emailError.textContent = "";
-      pwError.textContent = "";
-      pw2Error.textContent = "";
+      try {
+        await apiRequest("/auth/signup/", "POST", {
+          user_nk: name,
+          user_email: email,
+          verify_code: verifyCode,
+          user_pw: pw,
+          user_pw_confirm: pw2,
+          agree_terms: agreed
+        });
 
-      emailInput.classList.remove("input-error");
-      pwInput.classList.remove("input-error");
-      pw2Input.classList.remove("input-error");
-
-      // 약관 체크
-      if (!agreed) return showAlert("Please agree to Terms and Conditions.");
-
-      // 이메일 검사 — [수정] 틀리면 인라인 오류 + 팝업 동시 표시 후 즉시 반환
-      if (!emailRegex.test(email)) {
-        emailError.textContent = "Please check the email format";
-        emailInput.classList.add("input-error");
-        showAlert("Please check the email format.");
-        return;
+        closeModal();
+        showAlert("Registration completed successfully.");
+        window.location.href = "./chat";
+      } catch (e) {
+        console.error(e);
       }
-
-      // 비밀번호 검사
-      if (!passwordRegex.test(pw)) {
-        pwError.textContent = "Please check the new password";
-        pwInput.classList.add("input-error");
-        return;
-      }
-
-      // 비밀번호 확인 검사 — [수정] 문구 변경 + 팝업 추가
-      //if (pw !== pw2) return showAlert("Password does not match.");
-      if (pw2 === "" || pw !== pw2) {
-        pw2Error.textContent = "Password does not match.";
-        pw2Input.classList.add("input-error");
-        showAlert("Password does not match.");
-        return;
-      }
-
-      closeModal();
-      showAlert("Sign up completed.");
     });
   }
 
-  // 인증 버튼 이벤트 //
+  // 인증 버튼 이벤트
   const verifyEmailBtn = document.getElementById("verifyEmailBtn");
   if (verifyEmailBtn) {
-    verifyEmailBtn.addEventListener("click", () => {
+    verifyEmailBtn.addEventListener("click", async () => {
       const email = document.getElementById("signupEmail").value.trim();
-      // const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // [수정] 상단 공유 변수로 대체
       const emailError = document.getElementById("emailError");
+
       if (!emailRegex.test(email)) {
         emailError.textContent = "Please check the email format";
         return;
       }
+
       emailError.textContent = "";
-      // [수정] 인증 메일 발송 후 안내 팝업 문구 변경
-      showAlert("Please check your email<br> for the verification code and enter it below.");
+
+      try {
+        await apiRequest("/auth/signup/verify-code/", "POST", {
+          user_email: email
+        });
+
+        showAlert("Please check your email<br> for the verification code and enter it below.");
+      } catch (e) {
+        console.error(e);
+      }
     });
   }
-
   const forgotPw = document.getElementById("forgotPw");
   if (forgotPw) {
-    forgotPw.addEventListener("click", () => {
-      showAlert("A temporary password has been sent to an<br>email created by the system.");
+    forgotPw.addEventListener("click", async () => {
+
+      const email = document.getElementById("signinEmail").value.trim();
+
+      try {
+        await apiRequest("/auth/password/temp/", "POST", {
+          user_email: email
+        });
+
+        showAlert("A temporary password has been sent to your email.");
+
+      } catch(e){}
     });
   }
 
 const signinSubmit = document.getElementById("signinSubmit");
 if (signinSubmit) {
-  signinSubmit.addEventListener("click", () => {
-    const emailInput = document.getElementById("signinEmail");
-    const pwInput = document.getElementById("signinPw");
-    const emailError = document.getElementById("signinEmailError");
-    const pwError = document.getElementById("signinPwError");
+  signinSubmit.addEventListener("click", async () => {
+    const email = document.getElementById("signinEmail").value.trim();
+    const pw = document.getElementById("signinPw").value;
 
-    const email = emailInput.value.trim();
-    const pw = pwInput.value;
-    // const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // [수정] 상단 공유 변수로 대체
+    try {
+      const res = await apiRequest("/auth/login/", "POST", {
+        user_email: email,
+        user_pw: pw
+      });
 
-    let isValid = true;
+      closeModal();
 
-    emailError.textContent = "";
-    pwError.textContent = "";
+      window.location.href = "./chat";
 
-    emailInput.classList.remove("input-error");
-    pwInput.classList.remove("input-error");
-
-    if (!email) {
-      emailError.textContent = "Please enter your email";
-      emailInput.classList.add("input-error");
-      isValid = false;
-    } else if (!emailRegex.test(email)) {
-      emailError.textContent = "Please check the email format";
-      emailInput.classList.add("input-error");
-      showAlert("Please check the email format."); // 이메일 형식 오류 시 팝업 표시 추가
-      isValid = false;
-    }
-
-    if (!pw) {
-      // pwError.textContent = "Please enter your password"; // 비밀번호 안내 문구 미사용 수정
-      // pwInput.classList.add("input-error");
-      isValid = false;
-    }
-
-    if (!isValid) return;
-
-    closeModal();
-    window.location.href = "./chat";
+    } catch(e){}
   });
 }
 
@@ -334,7 +300,7 @@ if (signinSubmit) {
           return;
         }
 
-        savedSignupState = null; // 복원 완료 후 초기화
+        savedSignupState = null;
       }
 
       const agreeCheckbox = document.getElementById("signupAgree");
