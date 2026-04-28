@@ -44,7 +44,7 @@ Supported intents:
 - claim           : User wants to know about claim procedures or needs a claim form
 - clarify         : Not enough information to determine intent (ask user for more info)
 
-Supported insurer codes: uhcg, cigna, tricare, msh_china, nhis
+Supported insurer codes: uhcg, cigna, tricare, msh_china
 
 Respond ONLY with valid JSON in this exact format:
 {
