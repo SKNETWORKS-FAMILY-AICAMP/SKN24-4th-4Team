@@ -907,7 +907,7 @@ img {
   padding: 0;
 }
 
-/* [추가] 이용약관 팝업 내 섹션 헤더 (이용약관 / 개인정보 각 섹션 구분) */
+/*이용약관 팝업 내 섹션 헤더 (이용약관 / 개인정보 각 섹션 구분) */
 .terms-section-label {
   font-size: 13px;
   font-weight: 700;
@@ -915,18 +915,18 @@ img {
   color: #2d3748;
 }
 
-/* [추가] 이용약관 내용 박스에 스크롤 적용 (긴 내용 표시용) */
+/* 이용약관 내용 박스에 스크롤 적용 (긴 내용 표시용) */
 .terms-box.scrollable {
   max-height: 180px;
   overflow-y: auto;
 }
 
-/* [추가] 이용약관 팝업 내 체크박스 행 여백 조정 */
+/* 이용약관 팝업 내 체크박스 행 여백 조정 */
 .check-row.terms-check-row {
   margin: 6px 0 14px;
 }
 
-/* [추가] 에러 메시지 표시용 span */
+/*  에러 메시지 표시용 span */
 .field-error {
   display: block;
   font-size: 11px;
@@ -935,7 +935,7 @@ img {
   min-height: 14px;
 }
 
-/* [추가] 개인정보 수집 항목 테이블 스타일 */
+/* 개인정보 수집 항목 테이블 스타일 */
 .terms-table {
   width: 100%;
   border-collapse: collapse;
@@ -1638,4 +1638,29 @@ img {
   .topic-grid.compare-topic-dock {
     left: 122px;
   }
+}
+
+/*회원탈퇴 모달 추가*/
+.withdraw-modal .modal-title{
+  margin-bottom:28px;
+}
+.withdraw-message {
+  text-align: center;
+  font-size: 18px;
+  line-height: 1.7;
+  margin: 18px 0 28px;
+  word-break: keep-all;
+}
+
+.withdraw-btn-wrap {
+  display: flex;
+  justify-content: center;
+  gap: 18px;
+  margin-top: 24px;
+}
+
+#withdrawPassword {
+  height: 52px;
+  border-radius: 12px;
+  font-size: 16px;
 }

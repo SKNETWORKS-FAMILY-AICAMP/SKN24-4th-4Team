@@ -405,15 +405,72 @@ function openProfile() {
     }
   });
 
-  document.getElementById("deleteAccountBtn").addEventListener("click", () => {
+/*  document.getElementById("deleteAccountBtn").addEventListener("click", () => {
     openAlertSelect("Are you sure you want to delete your account?", "confirmWithdraw");
   });
+}*/
+document.getElementById("deleteAccountBtn").addEventListener("click", () => {
+  openWithdrawPasswordModal();
+});
 }
 
-async function confirmWithdraw() {
+/* 즉시 탈퇴 -> password 입력 후 delete account까지 하도록 기능 추가함*/
+/*탈퇴 확인*/
+function openWithdrawPasswordModal() {
+  const html = modalWrapper(`
+    <div class="modal-title" style="margin-bottom:28px;>Delete Account</div>
+
+    <div class="withdraw-message">
+      To continue, please enter your password.<br><br>
+      Please note that deleting your account is permanent and cannot be undone.
+    </div>
+
+    <div class="form-field">
+      <input class="form-input" id="withdrawPassword" type="password" placeholder="Enter your password" />
+      <div class="error-text" id="withdrawPasswordError"></div>
+    </div>
+
+    <div class="withdraw-btn-wrap">
+      <button class="primary-btn" id="confirmWithdrawBtn">Delete Account</button>
+      <button type="button" class="secondary-btn" id="cancelWithdrawBtn">Cancel</button>
+    </div>
+  `, "medium");
+
+  openModal(html);
+
+  const passwordInput = document.getElementById("withdrawPassword");
+  const passwordError = document.getElementById("withdrawPasswordError");
+  const confirmBtn = document.getElementById("confirmWithdrawBtn");
+  const cancelBtn = document.getElementById("cancelWithdrawBtn");
+
+  cancelBtn.addEventListener("click", closeModal);
+
+  confirmBtn.addEventListener("click", async () => {
+    const password = passwordInput.value.trim();
+
+    passwordError.textContent = "";
+    passwordInput.classList.remove("input-error");
+
+    if (!password) {
+      passwordError.textContent = "Please enter your password.";
+      passwordInput.classList.add("input-error");
+      return;
+    }
+
+    try {
+      await confirmWithdraw(password);
+    } catch (e) {
+      passwordError.textContent = "Incorrect password. Please try again.";
+      passwordInput.classList.add("input-error");
+    }
+  });
+}
+async function confirmWithdraw(password) {
   try {
-    await apiRequest("/user/withdraw/", "POST");
-    closeAlert();
+    await apiRequest("/user/withdraw/", "POST", {
+      password: password
+    });
+    /*closeAlert();*/
     closeModal();
     window.location.href = "/dacare/";
   } catch (e) {
@@ -423,6 +480,7 @@ async function confirmWithdraw() {
 
 function openFeedback() {
   const html = modalWrapper(`
+    <div class="withdraw-modal">
     <div class="modal-title">Please give us feedback</div>
 
     <button class="option-btn o1" data-rate="5">very satisfied</button>
