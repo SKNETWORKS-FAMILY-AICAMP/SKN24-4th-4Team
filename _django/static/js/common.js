@@ -6,6 +6,38 @@ let sessionExpireAt = null;
 let SESSION_TOTAL_SECONDS = null;
 const SESSION_NOTICE_BEFORE_SECONDS = 5 * 60;
 
+let apiLoadingCount = 0;
+
+function ensureLoadingSpinner() {
+  let spinner = document.getElementById("global-loading-spinner");
+  if (spinner) return spinner;
+
+  spinner = document.createElement("div");
+  spinner.id = "global-loading-spinner";
+  spinner.className = "global-loading hidden";
+  spinner.innerHTML = `
+    <div class="loading-card">
+      <div class="loading-spinner" aria-label="Loading"></div>
+      <div class="loading-text">Loading...</div>
+    </div>
+  `;
+  document.body.appendChild(spinner);
+  return spinner;
+}
+
+function showGlobalLoading() {
+  apiLoadingCount += 1;
+  ensureLoadingSpinner().classList.remove("hidden");
+}
+
+function hideGlobalLoading() {
+  apiLoadingCount = Math.max(0, apiLoadingCount - 1);
+  if (apiLoadingCount === 0) {
+    const spinner = document.getElementById("global-loading-spinner");
+    if (spinner) spinner.classList.add("hidden");
+  }
+}
+
 async function initSessionFromServer() {
   if (document.getElementById("user-info")){
     try {
@@ -155,6 +187,14 @@ function alertWrapper(inner, size = "small", close = true) {
 
 function closeModal() {
   const root = document.getElementById("modal-root");
+
+  const modal = root?.querySelector(".modal");
+  const isSignupModal = !!modal?.querySelector("#signupSubmit");
+
+  if (isSignupModal) {
+    resetSignupState();
+  }
+
   if (root) root.innerHTML = "";
 }
 
@@ -231,6 +271,8 @@ function confirmLogout() {
 }
 
 async function apiRequest(url, method = "GET", body = null) {
+  showGlobalLoading();
+
   try {
     const res = await fetch(`/dacare${url}`, {
       method,
@@ -249,5 +291,7 @@ async function apiRequest(url, method = "GET", body = null) {
   } catch (e) {
     console.error(e);
     throw e;
+  } finally {
+    hideGlobalLoading();
   }
 }

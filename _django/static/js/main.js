@@ -24,6 +24,7 @@ function openSignup() {
       <div class="modal-title big">Sign up</div>
       <div class="form-field">
         <label>Nickname</label><input class="form-input" id="signupName" type="text" />
+        <!-- <div class="error-text" id="nameError"></div> -->
       </div>
       <div class="form-field">
         <label>Email address</label>
@@ -212,6 +213,19 @@ function eventBind() {
     }
   }
 
+  // const signupNameInput = document.getElementById("signupName");
+  // if (signupNameInput) {
+  //   signupNameInput.addEventListener("input", () => {
+  //     const nameError = document.getElementById("nameError");
+  //     const val = signupNameInput.value.trim();
+  //     if (val && !/^.{2,50}$/.test(val)) {
+  //       nameError.textContent = "Please check the name format";
+  //     } else {
+  //       nameError.textContent = "";
+  //     }
+  //   });
+  // }
+
   const signupEmailInput = document.getElementById("signupEmail");
   if (signupEmailInput) {
     signupEmailInput.addEventListener("input", () => {
@@ -348,6 +362,22 @@ function eventBind() {
     });
   }
 
+  const resetPwEmailInput = document.getElementById("resetPwEmail");
+  if (resetPwEmailInput) {
+    resetPwEmailInput.addEventListener("input", () => {
+      const emailError = document.getElementById("resetPwEmailError");
+      const val = resetPwEmailInput.value.trim();
+
+      if (val && !emailRegex.test(val)) {
+        emailError.textContent = "Please check the email format";
+        resetPwEmailInput.classList.add("input-error");
+      } else {
+        emailError.textContent = "";
+        resetPwEmailInput.classList.remove("input-error");
+      }
+    });
+  }
+
   const sendTempPwBtn = document.getElementById("sendTempPwBtn");
   if (sendTempPwBtn) {
     sendTempPwBtn.addEventListener("click", async () => {
@@ -410,13 +440,12 @@ function eventBind() {
   if (termsCheck) termsCheck.addEventListener("change", updateAgreementState);
   if (privacyCheck) privacyCheck.addEventListener("change", updateAgreementState);
 
-  const cancelTerms = () => {
-    saveSignupData();
-    openSignup();
-  };
-
-  document.getElementById("cancelTerms")?.addEventListener("click", cancelTerms);
-  document.getElementById("cancelTermsBtn")?.addEventListener("click", cancelTerms);
+  const cancelTerms = document.getElementById("cancelTerms");
+  const cancelTermsBtn = document.getElementById("cancelTermsBtn");
+  if (cancelTerms && cancelTermsBtn) {
+    cancelTerms.addEventListener("click", closeTermsAndReturnSignup);
+    cancelTermsBtn.addEventListener("click", closeTermsAndReturnSignup);
+  }
 
   // Agree 클릭 시 두 항목이 모두 선택되지 않았으면 알림만 띄우고 약관 팝업은 유지
   if (agreeTermsBtn) {
@@ -426,8 +455,28 @@ function eventBind() {
         showAlert("Please agree to both required Terms and Privacy Policy.");
         return;
       }
-      saveSignupData();
       openSignup();
     });
   }
+}
+
+// 회원가입 폼 데이터와 동의 상태를 초기화하는 함수
+function resetSignupState() {
+  window.__signupFormData = {
+    name: "",
+    email: "",
+    verifyCode: "",
+    pw: "",
+    pw2: ""
+  };
+
+  window.__agreements = {
+    terms: false,
+    privacy: false
+  };
+}
+
+function closeTermsAndReturnSignup() {
+  // saveSignupData();
+  openSignup();
 }

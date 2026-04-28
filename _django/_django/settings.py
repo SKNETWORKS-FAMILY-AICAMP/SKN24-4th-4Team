@@ -147,12 +147,15 @@ LOGGING = {
         },
     },
 }
+# 임시
 FASTAPI_CHAT_URL = 'http://127.0.0.1:8002'
 
 LOGIN_REDIRECT_URL = '/'
 
-# Session 만료 시간 팝업 테스트를 위해 6분으로 변경
-SESSION_COOKIE_AGE = 60 * 6
+# # Session 만료 시간 팝업 테스트를 위해 6분으로 변경
+# SESSION_COOKIE_AGE = 60 * 6
+# 실제 서비스 30분
+SESSION_COOKIE_AGE = 60 * 30
 SESSION_SAVE_EVERY_REQUEST = False
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 

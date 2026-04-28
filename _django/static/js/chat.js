@@ -312,8 +312,8 @@ function openProfile() {
   }
 
   nicknameInput.addEventListener("input", () => {
-    if (nicknameInput.value && !nicknameRegex.test(nicknameInput.value.trim())) {
-      nicknameError.textContent = "Please enter a nickname to continue";
+    if (!nicknameInput.value || !nicknameRegex.test(nicknameInput.value.trim())) {
+      nicknameError.textContent = "Please check the nickname";
       nicknameInput.classList.add("input-error");
     } else {
       nicknameError.textContent = "";
@@ -541,7 +541,7 @@ function renderCompareScreen(){
             </div>
           </div>
         </div>
-        <div class="topic-grid" id="topicGrid">
+        <div class="topic-grid compare-topic-dock" id="topicGrid">
         ${suggestions.map(topic => `<button class="topic-chip" data-topic="${topic}">${topic}</button>`).join("")}
           
         </div>
