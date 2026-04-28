@@ -17,13 +17,15 @@ ingest_to_db.py
 
 import time
 from typing import List
-
+from pathlib import Path
 import chromadb
-from FlagEmbedding import BGEM3FlagModel
+from langchain_huggingface import HuggingFaceEmbeddings
+
 
 # ── 설정 ──────────────────────────────────────────────────────────────────────
 
-CHROMA_PATH = "vectordb/"
+BASE_DIR   = Path(__file__).resolve().parent.parent
+CHROMA_PATH = str(BASE_DIR / "vectordb")
 BATCH_SIZE  = 32
 BGE_MODEL   = "BAAI/bge-m3"
 
@@ -37,21 +39,15 @@ INSURER_TO_COLLECTION = {
 
 # ── BGE-M3 임베딩 ─────────────────────────────────────────────────────────────
 
-def load_model() -> BGEM3FlagModel:
-    print(f"[INFO] BGE-M3 모델 로딩: {BGE_MODEL}")
-    return BGEM3FlagModel(BGE_MODEL, use_fp16=True)
-
-
-def embed_texts(model: BGEM3FlagModel, texts: List[str]) -> List[List[float]]:
-    result = model.encode(
-        texts,
-        batch_size=BATCH_SIZE,
-        max_length=512,
-        return_dense=True,
-        return_sparse=False,
-        return_colbert_vecs=False,
+def load_model() -> HuggingFaceEmbeddings:
+    return HuggingFaceEmbeddings(
+        model_name=BGE_MODEL,
+        model_kwargs={"device": "cpu"},
+        encode_kwargs={"normalize_embeddings": True},
     )
-    return result["dense_vecs"].tolist()
+
+def embed_texts(model, texts):
+    return model.embed_documents(texts)
 
 
 # ── 컬렉션명 결정 ─────────────────────────────────────────────────────────────
