@@ -1464,3 +1464,120 @@ img {
   background: #3b82f6;
   color: #fff;
 }
+/* layout fix: keep logout/top notice fixed and scroll only chat contents */
+.main-panel {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.top-row,
+.notice-bar {
+  flex: 0 0 auto;
+}
+
+.main-panel > .center-stage {
+  flex: 1 1 auto;
+  min-height: 0;
+  width: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  /* padding-bottom: 96px; */
+}
+
+.main-panel > .center-stage::-webkit-scrollbar {
+  width: 8px;
+}
+
+.main-panel > .center-stage::-webkit-scrollbar-thumb {
+  background: lightgray;
+  border-radius: 999px;
+}
+
+.main-panel > .center-stage::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* === 2026-04-28 추가 수정 === */
+.message-row {
+  width: 100%;
+}
+
+.message-bubble-right,
+.message-bubble-left {
+  width: fit-content;
+  max-width: min(760px, 78%);
+  height: auto;
+  min-height: unset;
+  /* white-space: pre-wrap; */
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.message-row.left .ask-line {
+  width: 100%;
+  align-items: flex-start;
+}
+
+.message-row.left .ask-line > div:not(.message-bubble-left) {
+  min-width: 0;
+}
+
+.prompt-pill:disabled,
+.chip:disabled,
+.topic-chip:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+.prompt-pill.active:disabled,
+.chip.active:disabled,
+.topic-chip.selected:disabled {
+  opacity: 1;
+}
+
+.session-alert .alert-text strong {
+  font-size: 18px;
+  color: #1b65c2;
+}
+
+.error-404-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  background: #f4f7fb;
+}
+
+.error-404-card {
+  width: min(520px, 92vw);
+  background: #fff;
+  border: 1px solid #d8e4ee;
+  border-radius: 28px;
+  box-shadow: var(--shadow);
+  text-align: center;
+  padding: 42px 32px;
+}
+
+.error-404-code {
+  font-size: 72px;
+  font-weight: 800;
+  color: var(--blue);
+  margin: 0 0 8px;
+}
+
+.error-404-title {
+  font-size: 24px;
+  font-weight: 700;
+  margin: 0 0 12px;
+}
+
+.error-404-text {
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.7;
+  margin-bottom: 24px;
+}

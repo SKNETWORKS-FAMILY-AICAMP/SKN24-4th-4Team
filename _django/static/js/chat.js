@@ -13,14 +13,13 @@ function loadLoginUserFromTemplate() {
   if (userInfoEl) {
     loginUser = JSON.parse(userInfoEl.textContent);
   }
-
-  console.log("loginUser:", loginUser);
 }
 
 const chatState = {
   insurance: new URLSearchParams(location.search).get("insurance"),
   suggestion: "",
   screen:"",
+  session_id:"",
   compare: new URLSearchParams(location.search).get("compare") === "true"
 };
 
@@ -156,6 +155,37 @@ function renderSelectCardScreen() {
   return;
 }
 
+function submitChatMessage() {
+  const textarea = document.getElementById("chatInput");
+  const text = textarea ? textarea.value.trim() : "";
+  if (!text) {
+    showAlert("Please enter the contents.");
+    return;
+  }
+
+  textarea.value = "";
+  document.querySelectorAll(".chip, .prompt-pill").forEach((x) => { x.disabled = false; });
+  chatState.suggestion = text;
+
+  if (chatState.screen !== "chat-suggest") {
+    chatState.screen = "chat-suggest";
+    renderInsuranceChat();
+  } else {
+    addUserMessage(text);
+  }
+}
+
+function bindChatInputEvents(sendHandler = submitChatMessage) {
+  $("#sendBtn").off("click.chatSend").on("click.chatSend", sendHandler);
+
+  $("#chatInput").off("keydown.chatSend").on("keydown.chatSend", function (e) {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      $("#sendBtn").trigger("click");
+    }
+  });
+}
+
 function bindChatEvents() {
   bindModalEvents();
 
@@ -168,30 +198,25 @@ function bindChatEvents() {
     });
   });
 
-  // 챗봇 질문 예시 클릭 이벤트
+  // 챗봇 질문 예시 클릭 이벤트: 하나 선택 시 나머지 추천 질문 비활성화
   document.querySelectorAll("[data-fill]").forEach((el) => {
     el.addEventListener("click", () => {
+      if (el.disabled) return;
+
       chatState.suggestion = el.dataset.fill;
       const input = document.getElementById("chatInput");
       if (input) input.value = chatState.suggestion;
 
-      document.querySelectorAll(".chip, .prompt-pill").forEach((x) => x.classList.remove("active"));
-      if (el.classList.contains("chip")) el.classList.add("active");
+      document.querySelectorAll(".chip, .prompt-pill").forEach((x) => {
+        x.classList.remove("active");
+        if (x !== el) x.disabled = true;
+      });
+      el.classList.add("active");
+      el.disabled = false;
     });
   });
 
-  $("#sendBtn").click(function(){
-    const input = document.getElementById("chatInput");
-    const text = input ? input.value.trim() : "";
-    if (text) chatState.suggestion = text;
-    // 최초 질문 작성시 중간에 있는 chat-stage를 초기화해줘야됨.
-    if (chatState.screen !== "chat-suggest") {
-      chatState.screen = "chat-suggest";
-      renderInsuranceChat();
-    } else {
-      addUserMessage(text);
-    }
-  });
+  bindChatInputEvents();
 }
 
 function addUserMessage(message) {
@@ -276,6 +301,16 @@ function openProfile() {
   const newPwError = document.getElementById("profileNewPwError");
   const newPwConfirmError = document.getElementById("profileNewPwConfirmError");
 
+  function validateProfilePasswordConfirm() {
+    if (newPwConfirmInput.value && newPwConfirmInput.value !== newPwInput.value) {
+      newPwConfirmError.textContent = "Password does not match";
+      newPwConfirmInput.classList.add("input-error");
+    } else {
+      newPwConfirmError.textContent = "";
+      newPwConfirmInput.classList.remove("input-error");
+    }
+  }
+
   nicknameInput.addEventListener("input", () => {
     if (nicknameInput.value && !nicknameRegex.test(nicknameInput.value.trim())) {
       nicknameError.textContent = "Please enter a nickname to continue";
@@ -294,17 +329,10 @@ function openProfile() {
       newPwError.textContent = "";
       newPwInput.classList.remove("input-error");
     }
+    validateProfilePasswordConfirm();
   });
 
-  newPwConfirmInput.addEventListener("input", () => {
-    if (newPwConfirmInput.value && newPwConfirmInput.value !== newPwInput.value) {
-      newPwConfirmError.textContent = "Password does not match";
-      newPwConfirmInput.classList.add("input-error");
-    } else {
-      newPwConfirmError.textContent = "";
-      newPwConfirmInput.classList.remove("input-error");
-    }
-  });
+  newPwConfirmInput.addEventListener("input", validateProfilePasswordConfirm);
 
   document.getElementById("saveProfile").addEventListener("click", async () => {
     const nickname = nicknameInput.value.trim();
@@ -469,7 +497,6 @@ function renderInsuranceChat() {
 
   const stage = document.getElementById("chat_stage");
   if (chatState.screen === "chat-suggest") {
-    // 기본 틀 다시 맞추기
     conversationMarkup();
   } else {
     stage.innerHTML = `
@@ -515,16 +542,8 @@ function renderCompareScreen(){
           </div>
         </div>
         <div class="topic-grid" id="topicGrid">
-          <button class="topic-chip" data-topic="Annual Coverage Limit">Annual Coverage Limit</button>
-          <button class="topic-chip" data-topic="Pre-authorization Requirement for Hospitalization">Pre-authorization Requirement for Hospitalization</button>
-          <button class="topic-chip" data-topic="Cost-Sharing Structure">Cost-Sharing Structure</button>
-          <button class="topic-chip" data-topic="Outpatient Coverage Availability">Outpatient Coverage Availability</button>
-          <button class="topic-chip" data-topic="Maternity and Prenatal Coverage">Maternity and Prenatal Coverage</button>
-          <button class="topic-chip" data-topic="Mental Health Coverage">Mental Health Coverage</button>
-          <button class="topic-chip" data-topic="Dental and Vision Coverage">Dental and Vision Coverage</button>
-          <button class="topic-chip" data-topic="Emergency Medical Evacuation">Emergency Medical Evacuation</button>
-          <button class="topic-chip" data-topic="Coverage for Pre-existing Conditions">Coverage for Pre-existing Conditions</button>
-          <button class="topic-chip" data-topic="Direct Billing Network Availability">Direct Billing Network Availability</button>
+        ${suggestions.map(topic => `<button class="topic-chip" data-topic="${topic}">${topic}</button>`).join("")}
+          
         </div>
       </section>
     `;
@@ -542,10 +561,11 @@ function eventCompareBind() {
     });
 
     const textarea = document.getElementById('chatInput');
-    $("#sendBtn").click(function(){
+    bindChatInputEvents(function(){
       $("#topicGrid").addClass("hidden");
       const selectedTopics = [...document.querySelectorAll('.topic-chip.selected')].map((el) => el.dataset.topic);
       const message = textarea.value.trim();
+      if (!message && selectedTopics.length === 0) return;
       textarea.value = '';
       const compareArea = document.querySelector('.compare-area');
       compareArea.innerHTML += `
@@ -692,6 +712,16 @@ function openForceChangePasswordModal() {
   const newPwError = document.getElementById("tempNewPwError");
   const newPwConfirmError = document.getElementById("tempNewPwConfirmError");
 
+  function validateTempPasswordConfirm() {
+    if (newPwConfirmInput.value && newPwConfirmInput.value !== newPwInput.value) {
+      newPwConfirmError.textContent = "Password does not match";
+      newPwConfirmInput.classList.add("input-error");
+    } else {
+      newPwConfirmError.textContent = "";
+      newPwConfirmInput.classList.remove("input-error");
+    }
+  }
+
   newPwInput.addEventListener("input", () => {
     if (newPwInput.value && !passwordRegex.test(newPwInput.value)) {
       newPwError.textContent = "Please check the new password";
@@ -700,17 +730,10 @@ function openForceChangePasswordModal() {
       newPwError.textContent = "";
       newPwInput.classList.remove("input-error");
     }
+    validateTempPasswordConfirm();
   });
 
-  newPwConfirmInput.addEventListener("input", () => {
-    if (newPwConfirmInput.value && newPwConfirmInput.value !== newPwInput.value) {
-      newPwConfirmError.textContent = "Password does not match";
-      newPwConfirmInput.classList.add("input-error");
-    } else {
-      newPwConfirmError.textContent = "";
-      newPwConfirmInput.classList.remove("input-error");
-    }
-  });
+  newPwConfirmInput.addEventListener("input", validateTempPasswordConfirm);
 
   document.getElementById("forcePasswordSave").addEventListener("click", async () => {
     const currentPw = currentPwInput.value;
@@ -780,9 +803,6 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   eventBind();
-
-  // 세션 연장 타이머 시작
-  startSessionTimer();
 
   if (loginUser.is_temp_pw === "Y") {
     setTimeout(() => {

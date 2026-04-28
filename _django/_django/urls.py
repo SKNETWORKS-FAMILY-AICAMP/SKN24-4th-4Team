@@ -18,6 +18,8 @@ from django.contrib import admin
 from django.urls import include, path
 from django.views.generic import RedirectView
 
+handler404 = 'dacare.views.custom_404'
+
 urlpatterns = [
     path('', RedirectView.as_view(url='/dacare/', permanent=False), name='index'),
     path('admin/', admin.site.urls),

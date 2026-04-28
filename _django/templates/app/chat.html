@@ -1,14 +1,15 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Dacare UI</title>
-  <link rel="stylesheet" href="../static/css/styles.css" />
-  <link rel="icon" href="../static/images/favicon.ico">
-  <script src="../static/js/jquery-4.0.0.min.js"></script>
-  <script src="../static/js/common.js"></script>
-  <script src="../static/js/chat.js"></script>
+  <link rel="stylesheet" href="{% static 'css/styles.css' %}" />
+  <link rel="icon" href="{% static 'images/favicon.ico' %}">
+  <script src="{% static 'js/jquery-4.0.0.min.js' %}"></script>
+  <script src="{% static 'js/common.js' %}"></script>
+  <script src="{% static 'js/chat.js' %}"></script>
 </head>
 <body>
 {{ user_info|json_script:"user-info" }}
@@ -16,7 +17,7 @@
     <section class="app-shell">
       <aside class="sidebar">
         <div class="sidebar-top">
-          <img class="mini-logo" src="/static/images/dacare_logo.png" alt="Dacare">
+          <img class="mini-logo" src="{% static 'images/dacare_logo.png' %}" alt="Dacare">
         </div>
         <button class="new-chat" onclick="window.location.href='/dacare/chat'">+ New Chat</button>
         <button class="new-chat" onclick="window.location.href='/dacare/chat?compare=true'">+ Compare Insurance</button>
@@ -45,7 +46,7 @@
 
         <div class="side-footer">
           <button class="side-footer-user" onclick="openProfile()">
-            <img src="/static/images/cogwheel.png" alt="">
+            <img src="{% static 'images/cogwheel.png' %}" alt="">
             <span id="sidebarUserName">{{ user_info.user_nk|default:"User Name" }}</span>
           </button>
           <button class="side-footer-feedback" onclick="openFeedback()">Feedback</button>
@@ -58,7 +59,7 @@
       <div class="top-row">
         <div class="insurance-dropdown">
           <button class="dropdown-trigger hidden" id="dropdownTrigger" type="button">
-            <img class="dropdown-label" src="../static/images/united_main.png"></img>
+            <img class="dropdown-label" src="{% static 'images/united_main.png' %}" alt="Insurance Logo">
             <span class="caret">▼</span>
           </button>
 

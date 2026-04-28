@@ -28,9 +28,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-gt)+!4d!w!%_b96bvvqg09hyuu^6@&7tf$l@u0m(yni3%zgcmd'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-
-ALLOWED_HOSTS = []
+DEBUG = False
+ALLOWED_HOSTS = ['*']
 
 # Application definition
 
@@ -63,6 +62,7 @@ TEMPLATES = [
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
+                'django.template.context_processors.debug',
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
@@ -116,7 +116,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Seoul'
 
 USE_I18N = True
 
@@ -147,14 +147,13 @@ LOGGING = {
         },
     },
 }
-# 임시
 FASTAPI_CHAT_URL = 'http://127.0.0.1:8002'
 
 LOGIN_REDIRECT_URL = '/'
 
-# Session settings
-SESSION_COOKIE_AGE = 60 * 30
-SESSION_SAVE_EVERY_REQUEST = True
+# Session 만료 시간 팝업 테스트를 위해 6분으로 변경
+SESSION_COOKIE_AGE = 60 * 6
+SESSION_SAVE_EVERY_REQUEST = False
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'

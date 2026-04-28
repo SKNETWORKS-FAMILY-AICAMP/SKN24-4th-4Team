@@ -66,6 +66,10 @@ function openSignup() {
   if (pwEl && d.pw) pwEl.value = d.pw;
   if (pw2El && d.pw2) pw2El.value = d.pw2;
 
+  [nameEl, emailEl, verifyEl, pwEl, pw2El].forEach((el) => {
+    if (el) el.addEventListener('input', saveSignupData);
+  });
+
   eventBind();
 }
 
@@ -74,7 +78,8 @@ function openSignup() {
 // 수정: Agree 버튼 -> 두 체크박스 모두 체크해야 활성화
 function openTerms() {
   let html = modalWrapper(`
-        <div class="modal-title">Terms &amp; Privacy Policy</div>
+      <button class="close-btn" id="cancelTerms" type="button"><img src="/static/images/close.png" alt="close"></button>
+      <div class="modal-title">Terms &amp; Privacy Policy</div>
 
       <div class="terms-section-label">[Required] Terms of Service</div>
       <div class="terms-box scrollable">
@@ -96,7 +101,7 @@ function openTerms() {
         4. Infringing on the service&#39;s intellectual property rights or interfering with its operations
       </div>
       <div class="check-row terms-check-row">
-        <input id="termsCheck" type="checkbox" />
+        <input id="termsCheck" type="checkbox" ${window.__agreements.terms ? 'checked' : ''} />
         <span>[Required] I agree to the Terms of Service</span>
       </div>
 
@@ -130,15 +135,35 @@ function openTerms() {
         Users have the right to refuse consent for the collection and use of personal information. However, refusal to consent to required items may restrict membership registration and service use.
       </div>
       <div class="check-row terms-check-row">
-        <input id="privacyCheck" type="checkbox" />
+        <input id="privacyCheck" type="checkbox" ${window.__agreements.privacy ? 'checked' : ''} />
         <span>[Required] I agree to the Privacy Policy Collection &amp; Use</span>
       </div>
 
       <div class="modal-actions">
-        <button class="primary-btn" id="agreeTerms" disabled>Agree</button>
-        <button class="secondary-btn" data-close>Cancel</button>
+        <button class="primary-btn" id="agreeTerms">Agree</button>
+        <button class="secondary-btn" id="cancelTermsBtn" type="button">Cancel</button>
       </div>
-    `, "large");
+    `, "large", false);
+  openModal(html);
+  eventBind();
+}
+
+function openForgotPassword() {
+  const html = modalWrapper(`
+    <div class="modal-title big">Temporary Password</div>
+    <div class="form-field">
+      <label>Email address</label>
+      <input class="form-input" id="resetPwEmail" type="text" placeholder="example@gmail.com" />
+      <div class="error-text" id="resetPwEmailError"></div>
+    </div>
+    <div style="text-align:center">
+      <button class="primary-btn" id="sendTempPwBtn">Submit</button>
+    </div>
+    <div style="text-align:center;margin-top:12px">
+      <button class="ghost-btn" id="backToSigninBtn" type="button">Back to sign in</button>
+    </div>
+  `, "medium");
+
   openModal(html);
   eventBind();
 }
@@ -172,6 +197,21 @@ function eventBind() {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[!@#$%^&*()_\-+=\[{\]};:'",<.>/?\\|`~]).{8,16}$/;
 
+  function validateSignupPasswordConfirm() {
+    const pwInput = document.getElementById("signupPw");
+    const pw2Input = document.getElementById("signupPw2");
+    const pw2Error = document.getElementById("pw2Error");
+    if (!pwInput || !pw2Input || !pw2Error) return;
+
+    if (pw2Input.value && pw2Input.value !== pwInput.value) {
+      pw2Error.textContent = "Password does not match.";
+      pw2Input.classList.add("input-error");
+    } else {
+      pw2Error.textContent = "";
+      pw2Input.classList.remove("input-error");
+    }
+  }
+
   const signupEmailInput = document.getElementById("signupEmail");
   if (signupEmailInput) {
     signupEmailInput.addEventListener("input", () => {
@@ -196,24 +236,14 @@ function eventBind() {
       } else {
         pwError.textContent = "";
       }
+      validateSignupPasswordConfirm();
     });
   }
 
   // Sign Up 비밀번호 확인 실시간 유효성 검사 추가
   const signupPw2Input = document.getElementById("signupPw2");
   if (signupPw2Input) {
-    signupPw2Input.addEventListener("input", () => {
-      const pw2Error = document.getElementById("pw2Error");
-      const pw = document.getElementById("signupPw")?.value;
-      const val = signupPw2Input.value;
-      if (val && val !== pw) {
-        pw2Error.textContent = "Password does not match.";
-        signupPw2Input.classList.add("input-error");
-      } else {
-        pw2Error.textContent = "";
-        signupPw2Input.classList.remove("input-error");
-      }
-    });
+    signupPw2Input.addEventListener("input", validateSignupPasswordConfirm);
   }
 
   // Sign In 이메일 실시간 유효성 검사
@@ -251,6 +281,7 @@ function eventBind() {
       const pwInput = document.getElementById("signupPw");
       const pw2Input = document.getElementById("signupPw2");
       const agreed = document.getElementById("signupAgree")?.checked;
+      const allRequiredAgreed = !!(window.__agreements?.terms && window.__agreements?.privacy);
 
       const name = document.getElementById("signupName").value.trim();
       const email = emailInput.value.trim();
@@ -259,7 +290,7 @@ function eventBind() {
       const pw2 = pw2Input.value;
 
       // 약관 동의 미체크 시 제출 차단
-      if (!agreed) return showAlert("Please agree to the Terms &amp; Privacy Policy.");
+      if (!agreed || !allRequiredAgreed) return showAlert("Please agree to both required Terms and Privacy Policy.");
 
       try {
         await apiRequest("/auth/signup/", "POST", {
@@ -268,7 +299,7 @@ function eventBind() {
           verify_code: verifyCode,
           user_pw: pw,
           user_pw_confirm: pw2,
-          agree_terms: agreed
+          agree_terms: allRequiredAgreed
         });
 
         // 회원가입 완료 시 전역 상태 초기화
@@ -311,15 +342,41 @@ function eventBind() {
 
   const forgotPw = document.getElementById("forgotPw");
   if (forgotPw) {
-    forgotPw.addEventListener("click", async () => {
-      const email = document.getElementById("signinEmail").value.trim();
-      try {
-        await apiRequest("/auth/password/temp/", "POST", {
-          user_email: email
-        });
-        showAlert("A temporary password has been sent to your email.");
-      } catch(e){}
+    forgotPw.addEventListener("click", () => {
+      closeModal();
+      openForgotPassword();
     });
+  }
+
+  const sendTempPwBtn = document.getElementById("sendTempPwBtn");
+  if (sendTempPwBtn) {
+    sendTempPwBtn.addEventListener("click", async () => {
+      const emailInput = document.getElementById("resetPwEmail");
+      const emailError = document.getElementById("resetPwEmailError");
+      const email = emailInput.value.trim();
+
+      emailError.textContent = "";
+      emailInput.classList.remove("input-error");
+
+      if (!emailRegex.test(email)) {
+        emailError.textContent = "Please check the email format";
+        emailInput.classList.add("input-error");
+        return;
+      }
+
+      try {
+        await apiRequest("/auth/password/temp/", "POST", { user_email: email });
+        closeModal();
+        showAlert("A temporary password has been sent to your email.");
+      } catch (e) {
+        console.error(e);
+      }
+    });
+  }
+
+  const backToSigninBtn = document.getElementById("backToSigninBtn");
+  if (backToSigninBtn) {
+    backToSigninBtn.addEventListener("click", openSignin);
   }
 
   const signinSubmit = document.getElementById("signinSubmit");
@@ -328,7 +385,7 @@ function eventBind() {
       const email = document.getElementById("signinEmail").value.trim();
       const pw = document.getElementById("signinPw").value;
       try {
-        await apiRequest("/auth/login/", "POST", {
+        const res = await apiRequest("/auth/login/", "POST", {
           user_email: email,
           user_pw: pw
         });
@@ -343,20 +400,34 @@ function eventBind() {
   const privacyCheck = document.getElementById("privacyCheck");
   const agreeTermsBtn = document.getElementById("agreeTerms");
 
-  function updateAgreeButton() {
-    if (agreeTermsBtn) {
-      agreeTermsBtn.disabled = !(termsCheck?.checked && privacyCheck?.checked);
-    }
+  function updateAgreementState() {
+    window.__agreements = {
+      terms: !!termsCheck?.checked,
+      privacy: !!privacyCheck?.checked
+    };
   }
 
-  if (termsCheck) termsCheck.addEventListener("change", updateAgreeButton);
-  if (privacyCheck) privacyCheck.addEventListener("change", updateAgreeButton);
+  if (termsCheck) termsCheck.addEventListener("change", updateAgreementState);
+  if (privacyCheck) privacyCheck.addEventListener("change", updateAgreementState);
 
-  // 수정: agreeTerms 클릭 시 -> 전역 동의 상태 저장 후 openSignup 재오픈
+  const cancelTerms = () => {
+    saveSignupData();
+    openSignup();
+  };
+
+  document.getElementById("cancelTerms")?.addEventListener("click", cancelTerms);
+  document.getElementById("cancelTermsBtn")?.addEventListener("click", cancelTerms);
+
+  // Agree 클릭 시 두 항목이 모두 선택되지 않았으면 알림만 띄우고 약관 팝업은 유지
   if (agreeTermsBtn) {
     agreeTermsBtn.addEventListener("click", () => {
-      window.__agreements = { terms: true, privacy: true };
-      openSignup(); // 두 항목 모두 동의 -> 단일 체크박스 체크 상태로 회원가입 모달 재오픈
+      updateAgreementState();
+      if (!window.__agreements.terms || !window.__agreements.privacy) {
+        showAlert("Please agree to both required Terms and Privacy Policy.");
+        return;
+      }
+      saveSignupData();
+      openSignup();
     });
   }
 }
