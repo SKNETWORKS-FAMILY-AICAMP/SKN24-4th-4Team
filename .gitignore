@@ -50,6 +50,10 @@ vectordb/
 # 원본 PDF (저작권 / 용량)
 # data/
 
+# 전처리된 파일들
+data/nhis/processed/
+data/cigna/processed/
+
 # 환경변수 (보안)
 .env
 
@@ -68,3 +72,4 @@ evaluation/results/
 # 파인튜닝 체크포인트
 finetuning/checkpoints/
 finetuning/output/
+
