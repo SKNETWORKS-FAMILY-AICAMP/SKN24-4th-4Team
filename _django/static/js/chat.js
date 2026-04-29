@@ -418,7 +418,7 @@ document.getElementById("deleteAccountBtn").addEventListener("click", () => {
 /*탈퇴 확인*/
 function openWithdrawPasswordModal() {
   const html = modalWrapper(`
-    <div class="modal-title" style="margin-bottom:28px;>Delete Account</div>
+    <div class="modal-title" style="margin-bottom:28px;">Delete Account</div>
 
     <div class="withdraw-message">
       To continue, please enter your password.<br><br>
@@ -466,17 +466,14 @@ function openWithdrawPasswordModal() {
   });
 }
 async function confirmWithdraw(password) {
-  try {
-    await apiRequest("/user/withdraw/", "POST", {
-      password: password
-    });
-    /*closeAlert();*/
-    closeModal();
-    window.location.href = "/dacare/";
-  } catch (e) {
-    console.error(e);
-  }
+  await apiRequest("/user/withdraw/", "POST", {
+    password: password
+  });
+  /*closeAlert();*/
+  closeModal();
+  window.location.href = "/dacare/";
 }
+
 
 function openFeedback() {
   const html = modalWrapper(`
@@ -496,8 +493,12 @@ function openFeedback() {
     </div>
 
     <textarea class="form-textarea" id="feedbackText" maxlength="1000"></textarea>
-    <div class="error-text" id="feedbackTextError"></div>
 
+    <div style="text-align:right;font-size:12px;color:#777;margin-top:4px">
+      <span id="feedbackCount">0</span>/1000
+    </div>
+
+    <div class="error-text" id="feedbackTextError"></div>
     <div style="height:18px"></div>
 
     <div style="text-align:center">
@@ -506,6 +507,15 @@ function openFeedback() {
   `, "medium");
 
   openModal(html);
+
+  const feedbackTextInput = document.getElementById("feedbackText");
+  const feedbackCount = document.getElementById("feedbackCount");
+
+  if (feedbackTextInput && feedbackCount) {
+    feedbackTextInput.addEventListener("input", () => {
+      feedbackCount.textContent = feedbackTextInput.value.length;
+    });
+  }
 
   let selectedRating = null;
 
@@ -528,6 +538,11 @@ function openFeedback() {
 
     if (!selectedRating) {
       ratingError.textContent = "Please select a satisfaction level.";
+      return;
+    }
+
+    if (!feedbackText) {
+      textError.textContent = "Please enter your feedback.";
       return;
     }
 
