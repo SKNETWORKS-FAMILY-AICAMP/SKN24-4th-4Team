@@ -1,12 +1,14 @@
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # graph/nodes/retrieve_node.py
-# 역할 : ChromaDB 에서 관련 문서를 검색한다 (공통 RAG 검색 노드)
+# 역할 : ChromaDB 에서 관련 문서를 검색한다 (공통 RAG 검색 헬퍼)
 #
-# 파이프라인: ④ 절차 안내에서 단독으로 사용
-#             (① ② ⑤ ⑥ 는 각 노드가 내부적으로 직접 호출)
+# 파이프라인: 모든 파이프라인 노드(① ② ③ ④ ⑤ ⑥)에서
+#             query_collection() / query_multi_collections() 을
+#             import 해서 직접 호출하는 방식으로 사용
 #
-# 진입 조건 : analyze_node 에서 intent == "procedure" 일 때 호출
-# 다음 노드  : generate_node
+# 참고: retrieve() 노드 함수는 builder.py 에 등록되어 있으나
+#       실제 그래프 흐름에서 호출되지 않음.
+#       핵심은 공개 헬퍼 함수 query_collection() 임.
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 from __future__ import annotations
