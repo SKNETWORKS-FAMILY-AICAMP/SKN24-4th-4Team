@@ -95,6 +95,8 @@ def initial_state(session_id: str, user_message: str) -> InsuranceState:
 # DocumentMetadata — ChromaDB 메타데이터 표준
 # ※ 모든 ingest.py 가 반드시 따라야 하는 스키마
 # ──────────────────────────────────────────────────────────────
+
+
 class DocumentMetadata(TypedDict):
     insurer      : str   # "uhcg" | "cigna" | "tricare" | "msh_china" | "nhis"
     source_type  : str   # "pdf" | "pdf_table" | "web"

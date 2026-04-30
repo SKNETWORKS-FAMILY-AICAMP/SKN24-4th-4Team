@@ -27,18 +27,19 @@ Always cite which document your answer is based on.
 Keep your answer concise and structured."""
 
 _LANGUAGE_INSTRUCTION = {
-    "ko": "반드시 한국어로 답변하세요.",
-    "en": "Please respond in English.",
-    "ja": "必ず日本語で回答してください。",
-    "zh": "请用中文回答。",
-    "fr": "Répondez en français.",
-    "de": "Bitte antworten Sie auf Deutsch.",
-    "es": "Por favor, responda en español.",
+    "ko": "반드시 한국어로 답변하세요. 답변은 공백 포함 최대 1500자 이내로 작성하세요.",
+    "en": "Please respond in English. Keep your response within 1500 characters including spaces.",
+    "ja": "必ず日本語で回答してください。回答は空白を含め1500文字以内にしてください。",
+    "zh": "请用中文回答。回答请控制在1500个字符以内（含空格）。",
+    "fr": "Répondez en français. Limitez votre réponse à 1500 caractères espaces compris.",
+    "de": "Bitte antworten Sie auf Deutsch. Halten Sie Ihre Antwort auf maximal 1500 Zeichen inkl. Leerzeichen.",
+    "es": "Por favor, responda en español. Limite su respuesta a 1500 caracteres incluyendo espacios.",
 }
 
 
 # ──────────────────────────────────────────────────────────────
 # 노드 함수
+# 직접 import 해서 쓰는 파일 없음 -> Dead Node, Just 예시용
 # ──────────────────────────────────────────────────────────────
 
 def generate(state: InsuranceState) -> dict:
@@ -127,7 +128,7 @@ def call_llm_with_docs(
                 {"role": "user",   "content": user_content},
             ],
             max_tokens  = 1500,
-            temperature = 0.3,
+            temperature = 0.1,
         )
         return response.choices[0].message.content.strip()
 
