@@ -17,6 +17,7 @@
 #     │                        ├─ "claim"  → claim → END  (민간보험 연계)
 #     │                        └─ default  → END
 #     ├─ "claim"           → claim     → END  (⑥ 청구 + 양식)
+#     ├─ "general_query"   → general   → END  (⑦ 일반 coverage 질문)
 #     ├─ "clarify"         → clarify   → END  (재질문)
 #     └─ "blocked"         → END              (안전 필터 차단)
 #
@@ -41,10 +42,7 @@ from graph.nodes.procedure_node  import procedure
 from graph.nodes.nhis_node       import nhis
 from graph.nodes.claim_node      import claim
 from graph.nodes.clarify_node    import clarify
-
-# ── 공통 유틸 노드 (④ 절차 안내의 2단계 구조용으로 보존) ──────
-from graph.nodes.retrieve_node   import retrieve
-from graph.nodes.generate_node   import generate
+from graph.nodes.general_node    import general
 
 
 # ──────────────────────────────────────────────────────────────
@@ -71,6 +69,7 @@ def route_after_analyze(state: InsuranceState) -> str:
         Intent.PROCEDURE      : "procedure",
         Intent.NHIS           : "nhis",
         Intent.CLAIM          : "claim",
+        Intent.GENERAL_QUERY  : "general",
         Intent.CLARIFY        : "clarify",
         Intent.BLOCKED        : END,       # 안전 필터 차단 → 즉시 종료
     }
@@ -121,9 +120,8 @@ def build() -> "CompiledGraph":
     workflow.add_node("procedure", procedure)  # ④ 절차 안내
     workflow.add_node("nhis",      nhis)       # ⑤ NHIS
     workflow.add_node("claim",     claim)      # ⑥ 청구 + 양식
+    workflow.add_node("general",   general)    # ⑦ 일반 coverage 질문
     workflow.add_node("clarify",   clarify)    # 재질문
-    workflow.add_node("retrieve",  retrieve)   # (공통) RAG 검색 — 직접 호출용으로 보존
-    workflow.add_node("generate",  generate)   # (공통) 답변 생성 — 직접 호출용으로 보존
 
     # ── 진입점 설정 ────────────────────────────────────────────
     workflow.set_entry_point("analyze")
@@ -139,6 +137,7 @@ def build() -> "CompiledGraph":
             "procedure" : "procedure",
             "nhis"      : "nhis",
             "claim"     : "claim",
+            "general"   : "general",
             "clarify"   : "clarify",
             END         : END,
         },
@@ -157,7 +156,7 @@ def build() -> "CompiledGraph":
 
     # ── 단순 엣지: 각 파이프라인 → END ────────────────────────
     for node_name in ["within", "compare", "calculate", "procedure",
-                      "claim", "clarify", "retrieve", "generate"]:
+                      "claim", "general", "clarify"]:
         workflow.add_edge(node_name, END)
 
     # ── 체크포인터 설정 (멀티턴 상태 유지) ────────────────────

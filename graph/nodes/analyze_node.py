@@ -15,6 +15,7 @@
 #              "procedure"      → retrieve_node
 #              "nhis"           → nhis_node
 #              "claim"          → claim_node
+#              "general_query"  → general_node
 #              "clarify"        → clarify_node
 #              "blocked"        → END
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -42,6 +43,8 @@ Supported intents:
 - procedure       : User asks about general insurance procedures or processes
 - nhis            : User asks about NHIS (National Health Insurance Service / 국민건강보험)
 - claim           : User wants to know about claim procedures or needs a claim form
+- general_query   : General coverage or benefit inquiry that does not fit any category above
+                    (e.g. "Is mental health covered?", "Does my plan cover dental?")
 - clarify         : Not enough information to determine intent (ask user for more info)
 
 Supported insurer codes: uhcg, cigna, tricare, msh_china
@@ -150,7 +153,7 @@ def _run_intent_router(user_msg: str) -> dict:
         valid_intents = {
             Intent.WITHIN_COMPARE, Intent.CROSS_COMPARE,
             Intent.CALCULATION, Intent.PROCEDURE,
-            Intent.NHIS, Intent.CLAIM, Intent.CLARIFY,
+            Intent.NHIS, Intent.CLAIM, Intent.GENERAL_QUERY, Intent.CLARIFY,
         }
         result["intents"] = [
             i for i in result.get("intents", []) if i in valid_intents
