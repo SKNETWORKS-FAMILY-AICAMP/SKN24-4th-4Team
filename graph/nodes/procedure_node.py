@@ -8,12 +8,13 @@
 # 다음 노드  : END
 #
 # 흐름:
-#   1. {insurer}_plans 컬렉션에서 RAG 검색
-#   2. 단계별 절차 프롬프트 조립
-#   3. LLM 으로 단계별 안내 + 필요 서류 목록 생성
-#
-# 참고: insurer 는 analyze_node 에서 항상 확정되므로
-#       general_guidelines 컬렉션은 사용하지 않는다.
+#   1. slots 에서 treatment / plan 을 꺼내 검색 쿼리를 보강
+#   2. insurer 에 맞는 컬렉션 선택
+#      - nhis              → "nhis" 컬렉션
+#      - 일반 보험사       → "{insurer}_plans" 컬렉션
+#      - insurer 미확정    → query_collection 내부에서 빈 컬렉션 처리
+#   3. RAG 검색
+#   4. LLM 으로 단계별 안내 + 필요 서류 목록 생성
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 from __future__ import annotations
@@ -62,15 +63,41 @@ def procedure(state: InsuranceState) -> dict:
     insurer  = state.get("insurer", "")
     slots    = state.get("slots", {})
 
-    # ── Step 1: RAG 검색 ───────────────────────────────────────
-    # insurer 는 analyze_node 에서 항상 확정되므로 전용 컬렉션만 검색
+    # ── Step 1: 슬롯 기반 쿼리 보강 ───────────────────────────
+    # slots 에서 treatment / plan 을 꺼내 검색 쿼리를 구체화한다.
+    # 예) user_msg = "입원하려면 어떻게 해요?"
+    #     treatment = "입원", plan = "Gold"
+    #     → enriched_query = "입원하려면 어떻게 해요? 입원 Gold procedure"
+    treatment = slots.get("treatment", "")
+    plan      = slots.get("plan", "")
+
+    query_parts = [user_msg]
+    if treatment:
+        query_parts.append(treatment)
+    if plan:
+        query_parts.append(plan)
+    query_parts.append("procedure")          # 절차 관련 청크 우선 검색
+    enriched_query = " ".join(query_parts)
+
+    # ── Step 2: 컬렉션 선택 ────────────────────────────────────
+    # nhis 는 별도 컬렉션명을 사용한다 (compare_node 와 동일한 규칙)
+    if insurer == "nhis":
+        collection_name = "nhis"
+    elif insurer:
+        collection_name = f"{insurer}_plans"
+    else:
+        # insurer 미확정 — query_collection 내부에서 빈 컬렉션 오류를 잡아
+        # 빈 리스트를 반환하므로 그대로 진행한다.
+        collection_name = "_plans"
+
+    # ── Step 3: RAG 검색 ───────────────────────────────────────
     docs = query_collection(
-        collection_name = f"{insurer}_plans",
-        query           = user_msg,
+        collection_name = collection_name,
+        query           = enriched_query,
         top_k           = 5,
     )
 
-    # ── Step 2: LLM 단계별 절차 생성 ──────────────────────────
+    # ── Step 4: LLM 단계별 절차 생성 ──────────────────────────
     answer = call_llm_with_docs(
         user_query     = user_msg,
         retrieved_docs = docs,

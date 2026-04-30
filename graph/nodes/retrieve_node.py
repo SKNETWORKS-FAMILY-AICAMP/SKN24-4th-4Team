@@ -9,6 +9,7 @@
 
 from __future__ import annotations
 
+from pathlib import Path
 import chromadb
 from chromadb.config import Settings
 from chromadb.utils.embedding_functions import SentenceTransformerEmbeddingFunction
@@ -16,7 +17,11 @@ from chromadb.utils.embedding_functions import SentenceTransformerEmbeddingFunct
 # ──────────────────────────────────────────────────────────────
 # 상수
 # ──────────────────────────────────────────────────────────────
-VECTORDB_PATH = "./vectordb"
+# __file__ 기준 절대경로 사용 → CWD(현재 작업 디렉토리)와 무관하게 동작
+# retrieve_node.py 위치: Dacare_LLM/graph/nodes/retrieve_node.py
+# vectordb 위치:         Dacare_LLM/vectordb/
+_PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
+VECTORDB_PATH = str(_PROJECT_ROOT / "vectordb")
 DEFAULT_TOP_K = 5   # 기본 검색 결과 수
 
 
