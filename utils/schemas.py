@@ -63,6 +63,14 @@ class InsuranceState(TypedDict):
 
     # ── 최종 응답 (각 파이프라인 노드 또는 generate_node 에서 설정) ─
     answer         : str        # 클라이언트에 전달할 최종 응답 텍스트
+    
+    # 클라이언트에 전달할 최종 응답
+    sources: list
+    claim_form: list
+    compare_table: dict
+    related_questions: list
+    comparison_criteria: list
+
 
 
 # ──────────────────────────────────────────────────────────────
@@ -88,6 +96,13 @@ def initial_state(session_id: str, user_message: str) -> InsuranceState:
         nhis_step     = "eligibility_check",
         nhis_eligible = None,
         answer        = "",
+        
+        # 클라이언트에 전달할 최종 응답
+        sources=[],
+        claim_form=[],
+        compare_table={},
+        related_questions=[],
+        comparison_criteria=[],
     )
 
 

@@ -1,20 +1,17 @@
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # graph/nodes/retrieve_node.py
-# 역할 : ChromaDB 에서 관련 문서를 검색한다 (공통 RAG 검색 노드)
+# 역할 : ChromaDB 에서 관련 문서를 검색한다 (공통 RAG 검색 헬퍼)
 #
-# 파이프라인: ④ 절차 안내에서 단독으로 사용
-#             (① ② ⑤ ⑥ 는 각 노드가 내부적으로 직접 호출)
-#
-# 진입 조건 : analyze_node 에서 intent == "procedure" 일 때 호출
-# 다음 노드  : generate_node
+# 파이프라인: 모든 파이프라인 노드(① ② ③ ④ ⑤ ⑥)에서
+#             query_collection() / query_multi_collections() 을
+#             import 해서 직접 호출하는 방식으로 사용
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 from __future__ import annotations
 
 import chromadb
 from chromadb.config import Settings
-
-from utils.schemas import InsuranceState
+from chromadb.utils.embedding_functions import SentenceTransformerEmbeddingFunction
 
 # ──────────────────────────────────────────────────────────────
 # 상수
@@ -24,41 +21,7 @@ DEFAULT_TOP_K = 5   # 기본 검색 결과 수
 
 
 # ──────────────────────────────────────────────────────────────
-# 노드 함수
-# ──────────────────────────────────────────────────────────────
-
-def retrieve(state: InsuranceState) -> dict:
-    """
-    [공통 RAG] 사용자 질의와 관련된 문서를 ChromaDB 에서 검색한다.
-
-    읽는 state 필드:
-        user_message : 검색 쿼리 원문
-        intent       : 컬렉션 선택 기준 (procedure → general_guidelines)
-        insurer      : 보험사별 컬렉션 선택 기준
-
-    반환 dict (InsuranceState 업데이트):
-        retrieved_docs : [{"content": str, "metadata": dict}, ...] 형태의 문서 리스트
-    """
-    query     = state["user_message"]
-    intent    = state.get("intent", "")
-    insurer   = state.get("insurer", "")
-
-    # ── 컬렉션 선택 ────────────────────────────────────────────
-    # intent 와 insurer 를 조합해 적절한 컬렉션을 선택한다.
-    collection_name = _select_collection(intent, insurer)
-
-    # ── ChromaDB 검색 ──────────────────────────────────────────
-    docs = query_collection(
-        collection_name = collection_name,
-        query           = query,
-        top_k           = DEFAULT_TOP_K,
-    )
-
-    return {"retrieved_docs": docs}
-
-
-# ──────────────────────────────────────────────────────────────
-# 공개 헬퍼 — 다른 노드(within, nhis, claim 등)에서도 직접 호출 가능
+# 공개 헬퍼 — 모든 파이프라인 노드에서 import 해서 사용
 # ──────────────────────────────────────────────────────────────
 
 def query_collection(
@@ -77,15 +40,21 @@ def query_collection(
         where           : 메타데이터 필터 (예: {"source_type": "pdf_table"})
 
     Returns:
-        [{"content": str, "metadata": dict}, ...] 형태의 문서 리스트
+        [{"content": str, "metadata": dict, "score": float}, ...] 형태의 문서 리스트
         컬렉션이 없거나 오류 시 빈 리스트 반환
     """
     try:
+        embedding_fn = SentenceTransformerEmbeddingFunction(
+            model_name = "BAAI/bge-m3",  # ingest 시 사용한 모델과 반드시 동일해야 함
+        )
         client     = chromadb.PersistentClient(
             path     = VECTORDB_PATH,
             settings = Settings(anonymized_telemetry=False),
         )
-        collection = client.get_collection(collection_name)
+        collection = client.get_collection(
+            name               = collection_name,
+            embedding_function = embedding_fn,
+        )
 
         # 메타데이터 필터 포함 여부에 따라 쿼리 분기
         query_kwargs: dict = {
@@ -139,33 +108,3 @@ def query_multi_collections(
         name: query_collection(name, query, top_k_each)
         for name in collection_names
     }
-
-
-# ──────────────────────────────────────────────────────────────
-# 내부 함수
-# ──────────────────────────────────────────────────────────────
-
-def _select_collection(intent: str, insurer: str) -> str:
-    """
-    intent 와 insurer 를 기반으로 검색할 컬렉션 이름을 반환한다.
-
-    컬렉션 목록:
-        {insurer}_plans     — 각 보험사 플랜 문서 (uhcg, cigna, tricare, msh_china)
-        nhis                — NHIS 관련 문서
-        general_guidelines  — 일반 보험 절차 문서
-        claim_procedures    — 청구 절차 문서
-    """
-    if intent == "procedure":
-        return "general_guidelines"
-    if intent == "claim":
-        return "claim_procedures"
-    if intent == "nhis":
-        return "nhis"
-    if insurer:
-        # 보험사 코드 → 해당 컬렉션 (예: "uhcg" → "uhcg_plans")
-        if insurer == "nhis":
-            return "nhis"
-        return f"{insurer}_plans"
-
-    # fallback — 일반 가이드라인
-    return "general_guidelines"
