@@ -158,7 +158,7 @@ async function extendSession() {
     const res = await apiRequest("/session/extend/", "POST");
     startSessionTimer(res.session_expire_seconds);
     closeAlert();
-    showAlert("Session extended.");
+    openAlert("Session extended.");
   } catch (e) {
     console.error(e);
     forceSessionExpiredOverlay();
@@ -203,13 +203,13 @@ function closeAlert() {
   if (root) root.innerHTML = "";
 }
 
-function openAlert(message = "") {
+function openAlert(message = "", confirmUrl="") {
   const root = document.getElementById("alert-root");
   if (!root) return;
 
   root.innerHTML = alertWrapper(`
     <div class="alert-text" id="alertText">${message}</div>
-    <button class="primary-btn" data-close-alert>Confirm</button>
+    <button class="primary-btn" data-close-alert ${confirmUrl ? `onclick="window.location.href='${confirmUrl}'"` : ""}>Confirm</button>
   `, "small");
 
   bindModalEvents();
@@ -228,10 +228,6 @@ function openAlertSelect(message = "", function_name = "") {
   `, "small");
 
   bindModalEvents();
-}
-
-function showAlert(message) {
-  openAlert(message);
 }
 
 function openModal(html = "") {
@@ -283,7 +279,7 @@ async function apiRequest(url, method = "GET", body = null) {
     const data = await res.json();
 
     if (!data.success) {
-      showAlert(data.message);
+      openAlert(data.message);
       throw data;
     }
 

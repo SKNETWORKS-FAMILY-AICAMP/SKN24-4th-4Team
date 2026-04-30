@@ -9,4 +9,5 @@ urlpatterns = [
     path('chat/', include('dacare.urls.chat_urls')),
     path('feedback/', include('dacare.urls.feedback_urls')),
     path('session/', include('dacare.urls.session_urls')),
+    path('download-url/', views.download_url, name='download_url'),
 ]

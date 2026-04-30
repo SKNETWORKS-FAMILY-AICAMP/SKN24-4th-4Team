@@ -246,6 +246,8 @@ img {
 .history-list {
   display: flex;
   flex-direction: column;
+  max-height: 400px;
+  overflow: auto;
 }
 
 .history-item {
@@ -253,6 +255,7 @@ img {
   align-items: center;
   border-radius: 12px;
   transition: background-color .18s ease, box-shadow .18s ease;
+  margin-bottom: 5px;
 }
 
 .history-item:hover {
@@ -277,13 +280,13 @@ img {
 }
 
 .history-delete-btn {
-  width: 28px;
-  height: 28px;
+  width: 13px;
+  height: 15px;
   border: none;
   border-radius: 50%;
   background: transparent;
   color: #6d7782;
-  font-size: 14px;
+  font-size: 12px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -1090,10 +1093,10 @@ img {
   font-size: 15px;
 }
 
-.compare-area {
+/* .compare-area {
   max-width: 1290px;
   margin: 0 auto;
-}
+} */
 
 .assistant-row {
   display: flex;
@@ -1509,6 +1512,10 @@ img {
   cursor: not-allowed;
   transform: none !important;
   box-shadow: none !important;
+}
+
+.prompt-pill.disabled {
+  opacity: 0.45;
 }
 
 .prompt-pill.active:disabled,

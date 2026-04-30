@@ -1,40 +1,11 @@
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_GET, require_POST
 
-from dacare.forms import ChatSendForm, ChatDeleteForm, ChatStartForm, CompareInsuranceForm
+from dacare.forms import ChatSendForm, ChatDeleteForm
 from dacare.models import TblUserChatHistory
 from dacare.decorators import login_required_json
-from dacare.services.chat_service import (
-    send_chat_message,
-    start_new_chat,
-    call_fastapi_compare_server,
-    save_chat_detail,
-    get_or_create_chat_history,
-)
+from dacare.services.chat_service import send_chat_message
 from dacare.utils.request import get_json_body, json_success, json_error
-
-
-@csrf_exempt
-@require_POST
-@login_required_json
-def start_chat(request):
-    data = get_json_body(request)
-
-    if data is None:
-        return json_error('Invalid JSON format.')
-
-    form = ChatStartForm(data)
-
-    if not form.is_valid():
-        return json_error('Select insurer first', errors=form.errors)
-
-    result = start_new_chat(
-        user_id=request.session['user_id'],
-        insurance_name=form.cleaned_data['insurance_name']
-    )
-
-    return json_success('Chat started successfully.', result)
-
 
 @csrf_exempt
 @require_POST
@@ -62,14 +33,15 @@ def send_chat(request):
         result = send_chat_message(
             user_id=request.session['user_id'],
             message=form.cleaned_data['message'],
+            comparison_criteria=form.cleaned_data['comparison_criteria'],
             insurance_name=form.cleaned_data['insurance_name'],
-            chat_id=form.cleaned_data.get('chat_id')
+            chat_id=form.cleaned_data['chat_id'],
+            session_id=form.cleaned_data['session_id']
         )
     except ValueError as e:
         return json_error(str(e))
 
     return json_success('Message sent successfully.', result)
-
 
 @require_GET
 @login_required_json
@@ -91,13 +63,22 @@ def chat_list(request):
 
     return json_success('Chat history retrieved successfully.', data)
 
-
-@require_GET
+@csrf_exempt
+@require_POST
 @login_required_json
-def chat_detail(request, chat_id):
+def chat_detail(request):
+    data = get_json_body(request)
+
+    if data is None:
+        return json_error('Invalid JSON format.')
+
+    chat_id = data.get('chat_id')
+    insurance_name = data.get('insurance_name')
+
     try:
         history = TblUserChatHistory.objects.get(
             chat_id=chat_id,
+            insurance_name=insurance_name,
             user_id=request.session['user_id']
         )
     except TblUserChatHistory.DoesNotExist:
@@ -109,16 +90,13 @@ def chat_detail(request, chat_id):
         'chat_id': history.chat_id,
         'chat_title': history.chat_title,
         'insurance_name': history.insurance_name,
+        'session_id': history.session_id,
         'messages': [
             {
                 'chat_dtl_id': detail.chat_dtl_id,
                 'bot_yn': detail.bot_yn,
                 'chat_content': detail.chat_content,
-                'sources': detail.sources or [],
-                'suggestions': detail.suggestions or [],
-                'files': detail.files or [],
-                'comparison': detail.comparison,
-                'reg_dt': detail.reg_dt.strftime('%Y.%m.%d %H:%M'),
+                'chat_content_all': detail.chat_content_all,
             }
             for detail in details
         ]
@@ -150,64 +128,3 @@ def delete_chat(request):
         return json_error('Chat history not found', status=404)
 
     return json_success('Chat deleted successfully.')
-
-
-@csrf_exempt
-@require_POST
-@login_required_json
-def compare_insurance(request):
-    data = get_json_body(request)
-
-    if data is None:
-        return json_error('Invalid JSON format.')
-
-    form = CompareInsuranceForm(data)
-
-    if not form.is_valid():
-        return json_error('Invalid comparison request.', errors=form.errors)
-
-    user_id = request.session['user_id']
-    message = form.cleaned_data.get('message') or ''
-    insurance_names = form.cleaned_data['insurance_names']
-    selected_topics = form.cleaned_data['selected_topics']
-
-    result = call_fastapi_compare_server(
-        user_id=user_id,
-        message=message,
-        insurance_names=insurance_names,
-        selected_topics=selected_topics
-    )
-
-    chat = get_or_create_chat_history(
-        user_id=user_id,
-        insurance_name='Compare Insurance',
-        title='Compare Insurance'
-    )
-
-    user_summary = f"Selected Topics: {', '.join(selected_topics)}"
-
-    save_chat_detail(
-        chat=chat,
-        content=user_summary,
-        bot_yn='N'
-    )
-
-    answer = (result.get('answer') or '')[:1500]
-    sources = result.get('sources') or []
-    comparison = result.get('comparison') or {}
-
-    bot_message = save_chat_detail(
-        chat=chat,
-        content=answer,
-        bot_yn='Y',
-        sources=sources,
-        comparison=comparison
-    )
-
-    return json_success('Comparison completed successfully.', {
-        'chat_id': chat.chat_id,
-        'bot_message_id': bot_message.chat_dtl_id,
-        'answer': answer,
-        'sources': sources,
-        'comparison': comparison,
-    })

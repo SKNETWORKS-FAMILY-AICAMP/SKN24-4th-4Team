@@ -304,7 +304,7 @@ function eventBind() {
       const pw2 = pw2Input.value;
 
       // 약관 동의 미체크 시 제출 차단
-      if (!agreed || !allRequiredAgreed) return showAlert("Please agree to both required Terms and Privacy Policy.");
+      if (!agreed || !allRequiredAgreed) return openAlert("Please agree to both required Terms and Privacy Policy.");
 
       try {
         await apiRequest("/auth/signup/", "POST", {
@@ -320,8 +320,8 @@ function eventBind() {
         window.__agreements = { terms: false, privacy: false };
         window.__signupFormData = { name: '', email: '', verifyCode: '', pw: '', pw2: '' };
         closeModal();
-        showAlert("Registration completed successfully.");
-        window.location.href = "./chat";
+        openAlert("Registration completed successfully.", "./chat");
+        // window.location.href = "./chat";
       } catch (e) {
         console.error(e);
       }
@@ -347,7 +347,7 @@ function eventBind() {
           user_email: email
         });
 
-        showAlert("Please check your email<br> for the verification code and enter it below.");
+        openAlert("Please check your email<br>Enter your authentication code in 3 minutes and enter it below.");
       } catch (e) {
         console.error(e);
       }
@@ -397,7 +397,7 @@ function eventBind() {
       try {
         await apiRequest("/auth/password/temp/", "POST", { user_email: email });
         closeModal();
-        showAlert("A temporary password has been sent to your email.");
+        openAlert("A temporary password has been sent to your email.");
       } catch (e) {
         console.error(e);
       }
@@ -452,7 +452,7 @@ function eventBind() {
     agreeTermsBtn.addEventListener("click", () => {
       updateAgreementState();
       if (!window.__agreements.terms || !window.__agreements.privacy) {
-        showAlert("Please agree to both required Terms and Privacy Policy.");
+        openAlert("Please agree to both required Terms and Privacy Policy.");
         return;
       }
       openSignup();

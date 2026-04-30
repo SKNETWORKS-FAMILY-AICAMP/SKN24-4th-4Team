@@ -1,5 +1,9 @@
 from django.shortcuts import redirect, render
 
+from django.conf import settings
+
+from dacare.utils.request import json_success
+
 def index(request):
     return render(request, 'app/index.html')
 
@@ -22,3 +26,7 @@ def chat(request):
 
 def custom_404(request, exception):
     return render(request, '404.html', status=404)
+
+def download_url(request):
+    downloadUrl = settings.FASTAPI_CHAT_URL
+    return json_success('Download URL retrieved successfully.', {'download_url': downloadUrl})

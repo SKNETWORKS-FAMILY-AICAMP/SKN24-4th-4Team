@@ -35,10 +35,7 @@ class TblUserChatHistDtl(models.Model):
     chat_content = models.CharField(max_length=1500, db_column='CHAT_CONTENT')
 
     # 추가
-    sources = models.JSONField(null=True, blank=True, db_column='SOURCES')
-    suggestions = models.JSONField(null=True, blank=True, db_column='SUGGESTIONS')
-    files = models.JSONField(null=True, blank=True, db_column='FILES')
-    comparison = models.JSONField(null=True, blank=True, db_column='COMPARISON')
+    chat_content_all = models.JSONField(null=True, blank=True, db_column='CHAT_CONTENT_ALL')
 
     reg_dt = models.DateTimeField(auto_now_add=True, db_column='REG_DT')
 

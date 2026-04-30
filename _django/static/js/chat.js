@@ -3,8 +3,8 @@ const userInfoEl = document.getElementById("user-info");
 let loginUser = {
   user_id: null,
   user_email: "",
-  user_nk: "User Name",
-  is_temp_pw: "N"
+  user_nk: "",
+  is_temp_pw: ""
 };
 
 function loadLoginUserFromTemplate() {
@@ -17,8 +17,8 @@ function loadLoginUserFromTemplate() {
 
 const chatState = {
   insurance: new URLSearchParams(location.search).get("insurance"),
-  suggestion: "",
   screen:"",
+  chat_id:new URLSearchParams(location.search).get("chat_id"),
   session_id:"",
   compare: new URLSearchParams(location.search).get("compare") === "true"
 };
@@ -30,6 +30,7 @@ const insuranceAssets = {
   "MSH China": "/static/images/msh_chat.png"
 };
 
+// 보험사별 비교 시 추천 질문 리스트
 const suggestions = [
   "Pre authorization Requirement for Hospitalization",
   "Cost-Sharing Structure",
@@ -43,13 +44,7 @@ const suggestions = [
   "Direct Billing Network Availability"
 ];
 
-const exampleBotText = `
-When the beneficiary receives treatment in their country of nationality, coverage must meet specific conditions.
-This policy covers treatment costs only if the beneficiary is temporarily residing in their country of nationality.
-Under these circumstances, the beneficiary's stay in their country of nationality is limited, and that period cannot be exceeded
-[Source: CGHP Policy Rules CGIC EN 02_2026.pdf / Page: 4].
-`;
-
+// 챗봇 화면 하단 입력창 렌더링 함수
 function renderBottomInput() {
   let stage = document.getElementById("chat_stage");
   if (!stage) return;
@@ -64,42 +59,6 @@ function renderBottomInput() {
   `;
 }
 
-function conversationMarkup() {
-  $("#chat_stage").html("");
-  userMessageAppend(chatState.suggestion);
-  botMessageAppend();
-  renderBottomInput();
-}
-
-// 챗봇이 파일을 return 했을 때 메시지에 파일 첨부하는 함수
-function fileMessageAppend(fileName="Claim.pdf", fileSize= "1.2 MB", fileType="PDF", filePath="/static/images/bot_profile.png") {
-  $(".chat-view").append(`
-      <div class="file-attachment-wrap">
-        <button class="file-attachment" type="button" onclick="downloadAttachedFile('${filePath}')">
-          <span class="file-icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24" fill="none">
-              <path d="M7 3.75h6.2L18.25 8.8V20a1.25 1.25 0 0 1-1.25 1.25H7A1.25 1.25 0 0 1 5.75 20V5A1.25 1.25 0 0 1 7 3.75Z" stroke="currentColor" stroke-width="1.8"></path>
-              <path d="M13 3.75V8.5h4.75" stroke="currentColor" stroke-width="1.8"></path>
-            </svg>
-          </span>
-          <span class="file-meta">
-            <span class="file-name">${fileName}</span>
-            <span class="file-size">${fileType} · ${fileSize}</span>
-          </span>
-        </button>
-      </div>`);
-}
-
-// 파일 다운로드 함수
-function downloadAttachedFile(filePath) {
-  const link = document.createElement("a");
-  link.href = filePath;
-  link.download = filePath.split("/").pop();
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-}
-
 // user 메시지 추가 함수
 function userMessageAppend(message) {
   $("#chat_stage").append(`
@@ -111,14 +70,14 @@ function userMessageAppend(message) {
 }
 
 // bot 답변 추가 함수
-function botMessageAppend(message = exampleBotText) {
+function botMessageAppend(message) {
   $("#chat_stage").append(`
       <div class="message-row left">
         <div style="width:100%">
           <div class="ask-line">
             <img src="/static/images/bot_profile.png" alt="Bot Avatar" class="ask-avatar">
             <div class="message-bubble-left" style="margin-top:10px">
-              ${exampleBotText}
+              ${message}
             </div>
           </div>
         </div>
@@ -126,9 +85,7 @@ function botMessageAppend(message = exampleBotText) {
     `);
 }
 
-function botMessageTableAppend(message) {
-}
-
+// 보험 선택 화면 렌더링 함수
 function renderSelectCardScreen() {
   const stage = document.getElementById("chat_stage");
   if (!stage) return;
@@ -155,27 +112,8 @@ function renderSelectCardScreen() {
   return;
 }
 
-function submitChatMessage() {
-  const textarea = document.getElementById("chatInput");
-  const text = textarea ? textarea.value.trim() : "";
-  if (!text) {
-    showAlert("Please enter the contents.");
-    return;
-  }
-
-  textarea.value = "";
-  document.querySelectorAll(".chip, .prompt-pill").forEach((x) => { x.disabled = false; });
-  chatState.suggestion = text;
-
-  if (chatState.screen !== "chat-suggest") {
-    chatState.screen = "chat-suggest";
-    renderInsuranceChat();
-  } else {
-    addUserMessage(text);
-  }
-}
-
-function bindChatInputEvents(sendHandler = submitChatMessage) {
+// sendBtn의 이벤트
+function bindChatInputEvents(sendHandler = sendChatMessage) {
   $("#sendBtn").off("click.chatSend").on("click.chatSend", sendHandler);
 
   $("#chatInput").off("keydown.chatSend").on("keydown.chatSend", function (e) {
@@ -185,6 +123,26 @@ function bindChatInputEvents(sendHandler = submitChatMessage) {
     }
   });
 }
+
+function bindFillEvents() {
+  // 챗봇 질문 예시 클릭 이벤트: 하나 선택 시 나머지 추천 질문 비활성화
+  document.querySelectorAll("[data-fill]").forEach((el) => {
+    el.addEventListener("click", () => {
+      const text = el.dataset.fill;
+      const input = document.getElementById("chatInput");
+      if (input) input.value = text;
+
+      document.querySelectorAll(".chip, .prompt-pill").forEach((x) => {
+        x.classList.remove("active");
+        x.classList.add("disabled");
+      });
+      el.classList.add("active");
+      el.classList.remove("disabled");
+      el.disabled = false;
+    });
+  });
+}
+  
 
 function bindChatEvents() {
   bindModalEvents();
@@ -198,46 +156,8 @@ function bindChatEvents() {
     });
   });
 
-  // 챗봇 질문 예시 클릭 이벤트: 하나 선택 시 나머지 추천 질문 비활성화
-  document.querySelectorAll("[data-fill]").forEach((el) => {
-    el.addEventListener("click", () => {
-      if (el.disabled) return;
-
-      chatState.suggestion = el.dataset.fill;
-      const input = document.getElementById("chatInput");
-      if (input) input.value = chatState.suggestion;
-
-      document.querySelectorAll(".chip, .prompt-pill").forEach((x) => {
-        x.classList.remove("active");
-        if (x !== el) x.disabled = true;
-      });
-      el.classList.add("active");
-      el.disabled = false;
-    });
-  });
-
+  bindFillEvents();
   bindChatInputEvents();
-}
-
-function addUserMessage(message) {
-  $("#chat_stage").append(`
-    <div class="message-row right">
-      <div class="message-bubble-right">
-        ${message}
-      </div>
-    </div>`);
-   // 챗봇 답변 예시 추가
-   $("#chat_stage").append(`
-    <div class="message-row left">
-      <div style="width:100%">
-        <div class="ask-line">
-          <img src="/static/images/bot_profile.png" alt="Bot Avatar" class="ask-avatar">
-          <div class="message-bubble-left" style="margin-top:10px">
-            This is a sample answer to your question: "${message}". The actual answer will depend on the insurance policy details and may vary.  Please consult your insurance provider for accurate information.
-          </div>
-        </div>
-      </div>
-    </div>`);
 }
 
 function openProfile() {
@@ -399,17 +319,13 @@ function openProfile() {
       }
 
       closeModal();
-      showAlert("User information saved.");
+      openAlert("User information saved.");
     } catch (e) {
       console.error(e);
     }
   });
 
-/*  document.getElementById("deleteAccountBtn").addEventListener("click", () => {
-    openAlertSelect("Are you sure you want to delete your account?", "confirmWithdraw");
-  });
-}*/
-document.getElementById("deleteAccountBtn").addEventListener("click", () => {
+  document.getElementById("deleteAccountBtn").addEventListener("click", () => {
   openWithdrawPasswordModal();
 });
 }
@@ -465,6 +381,7 @@ function openWithdrawPasswordModal() {
     }
   });
 }
+
 async function confirmWithdraw(password) {
   // 수정: 키 이름을 'password' → 'current_pw'로 변경 (서버 WithdrawForm 필드명과 일치)
   await apiRequest("/user/withdraw/", "POST", {
@@ -563,20 +480,23 @@ function openFeedback() {
       });
 
       closeModal();
-      showAlert("Feedback submitted successfully.");
+      openAlert("Feedback submitted successfully.");
     } catch (e) {
       console.error(e);
     }
   });
 }
 
+
+// 보험 선택 후 챗봇 화면 렌더링 함수
 function renderInsuranceChat() {
   $(".dropdown-label").attr("src", insuranceAssets[chatState.insurance]);
 
-  const stage = document.getElementById("chat_stage");
-  if (chatState.screen === "chat-suggest") {
-    conversationMarkup();
+  if (chatState.chat_id) {
+    loadChatHistory_dtl(chatState.chat_id);
   } else {
+    // 최초 채팅 화면 그리기
+    const stage = document.getElementById("chat_stage");
     stage.innerHTML = `
       <div class="center-stage">
         <div class="chat-empty-title">What are you curious about?</div>
@@ -601,112 +521,35 @@ function selectInsurance(){
   if(chatState.insurance) {
     window.location.href = "./chat?insurance=" + chatState.insurance;
   } else {
-    showAlert("Please select an insurance plan to continue.");
+    openAlert("Please select an insurance plan to continue.");
   }
 }
 
+// 보험사별 비교
 function renderCompareScreen(){
-  const stage = document.getElementById("chat_stage");
-  stage.innerHTML = `
-    <section class="compare-area">
-        <div class="message-row left">
-          <div style="width:100%">
-            <div class="ask-line">
-            <img src="/static/images/bot_profile.png" alt="Bot Avatar" class="ask-avatar">
-              <div class="message-bubble-left" style="margin-top:10px">
-                Hello! let me help you with comparing. Which would you like to compare? Here are some examples.
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="topic-grid compare-topic-dock" id="topicGrid">
-        ${suggestions.map(topic => `<button class="topic-chip" data-topic="${topic}">${topic}</button>`).join("")}
-          
-        </div>
-      </section>
+  if(chatState.chat_id) {
+    loadChatHistory_dtl(chatState.chat_id);
+  } else {
+    botMessageAppend("Hello! let me help you with comparing. Which would you like to compare? Here are some examples.");
+    // 챗봇 답변 아래에 비교 항목 추천
+    const stage = document.getElementById("chat_stage");
+    stage.innerHTML += `
+      <div class="topic-grid compare-topic-dock" id="topicGrid">
+      ${suggestions.map(topic => `<button class="topic-chip" data-topic="${topic}">${topic}</button>`).join("")}
+      </div>
     `;
-    renderBottomInput()
-    eventCompareBind()
-}
+    renderBottomInput();
 
-function eventCompareBind() {
-  const chips = document.querySelectorAll('.topic-chip');
-
+    const chips = document.querySelectorAll('.topic-chip');
     chips.forEach((chip) => {
       chip.addEventListener('click', () => {
         chip.classList.toggle('selected');
       });
     });
+  }
 
-    const textarea = document.getElementById('chatInput');
-    bindChatInputEvents(function(){
-      $("#topicGrid").addClass("hidden");
-      const selectedTopics = [...document.querySelectorAll('.topic-chip.selected')].map((el) => el.dataset.topic);
-      const message = textarea.value.trim();
-      if (!message && selectedTopics.length === 0) return;
-      textarea.value = '';
-      const compareArea = document.querySelector('.compare-area');
-      compareArea.innerHTML += `
-      <div class="message-row right">
-        <div class="message-bubble-right">
-          ${message} - Selected Topics: ${selectedTopics.join(', ')}
-        </div>
-      </div>`;
-      compareArea.innerHTML += `
-      <div class="ask-line">
-        <img src="/static/images/bot_profile.png" alt="Bot Avatar" class="ask-avatar">
-        <div class="message-bubble-left" style="margin-top:10px">Here is the simplified comparison of the standard entry-level plans from the selected providers, based on your requested criteria. Data below is illustrative for reference:[UHCG_Global_Plus_Standard_2026.pdf p.14, Cigna_Global_Health_Options_Silver.pdf p.28
-TRICARE_Overseas_Program_Handbook.pdf p.42, MSH_International_Policy_Rules_V8.pdf p.19]</div> 
-      </div>`;
-      compareArea.innerHTML += `
-      <div class="table-wrap">
-          <table class="compare-table">
-            <thead>
-              <tr>
-                <th>Comparison Criteria</th>
-                <th>UHCG (Basic)</th>
-                <th>Cigna (Silver)</th>
-                <th>Tricare (Standard)</th>
-                <th>MSH China (Standard)</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <th>Annual Coverage Limit</th>
-                <td>$1,000,000</td>
-                <td>$2,500,000</td>
-                <td>Unlimited (Network)</td>
-                <td>$1,500,000</td>
-              </tr>
-              <tr>
-                <th>Cost-Sharing Structure</th>
-                <td>$500 Deductible then 20% Coinsurance</td>
-                <td>$200 Deductible, Direct Co-pay</td>
-                <td>$0 Deductible (Prime Network), minimal co-pay</td>
-                <td>$300 Deductible, Direct Billing at partner clinics</td>
-              </tr>
-              <tr>
-                <th>Outpatient Coverage</th>
-                <td>Full coverage, Direct Billing available</td>
-                <td>Specialist Referral often required</td>
-                <td>Direct Access (Network), Prior Auth for some</td>
-                <td>Direct Billing at limited partner clinics</td>
-              </tr>
-              <tr>
-                <th>Maternity and Prenatal Coverage</th>
-                <td>10-month waiting period, standard coverage</td>
-                <td>Covered after 6 months, incl. prenatal</td>
-                <td>Standard coverage, Network dependent</td>
-                <td>Covered up to $10,000 per pregnancy</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>`;
-    });
-}
-
-function compareTableAppend() {
-
+  bindChatEvents();
+  bindChatInputEvents();
 }
 
 function eventBind() {
@@ -724,30 +567,25 @@ function eventBind() {
   });
 }
 
-function confirmDeleteHistory(event, button) {
-  if (event) event.stopPropagation();
-
-  const historyItem = button.closest(".history-item");
-  if (!historyItem) return;
-
-  const historyId = historyItem.dataset.historyId;
-  if (!historyId) return;
-
-  window.__selectedHistoryId = historyId;
-  openAlertSelect("Are you sure you want to delete this history?", "deleteHistory");
-}
-
-function deleteHistory() {
+async function deleteHistory() {
   const historyId = window.__selectedHistoryId;
   if (!historyId) return;
 
-  const historyItem = document.querySelector(`.history-item[data-history-id="${historyId}"]`);
-  if (historyItem) {
-    historyItem.remove();
-  }
+  try {
+      await apiRequest("/chat/delete/", "POST", {
+        chat_id: historyId
+      });
+      const historyItem = document.querySelector(`.history-item[data-history-id="${historyId}"]`);
+      if (historyItem) {
+        historyItem.remove();
+      }
 
-  window.__selectedHistoryId = null;
-  closeAlert();
+      window.__selectedHistoryId = null;
+      closeAlert();
+      location.reload(true);
+    } catch (e) {
+      console.error(e);
+    }
 }
 
 function openForceChangePasswordModal() {
@@ -778,7 +616,7 @@ function openForceChangePasswordModal() {
   `, "medium", false);
 
   openModal(html);
-  showAlert("Please change your temporary password to continue using the service.");
+  openAlert("Please change your temporary password to continue using the service.");
 
   const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[!@#$%^&*()_\-+=\[{\]};:'",<.>/?\\|`~]).{8,16}$/;
 
@@ -853,7 +691,7 @@ function openForceChangePasswordModal() {
 
       loginUser.is_temp_pw = "N";
       closeModal();
-      showAlert("Password updated successfully.");
+      openAlert("Password updated successfully.");
     } catch (e) {
       console.error(e);
     }
@@ -879,6 +717,7 @@ document.addEventListener("DOMContentLoaded", () => {
   } else {
     renderSelectCardScreen();
   }
+  renderChatHistory();
 
   eventBind();
 
@@ -888,3 +727,206 @@ document.addEventListener("DOMContentLoaded", () => {
     }, 300);
   }
 });
+
+function sendChatMessage() {
+  const textarea = document.getElementById("chatInput");
+  const text = textarea ? textarea.value.trim() : "";
+  if (!text) {
+    openAlert("Please enter the contents.");
+    return;
+  }
+
+  var selectedTopics = [];
+  if($("#topicGrid").hasClass("hidden") === false) {
+    selectedTopics = [...document.querySelectorAll('.topic-chip.selected')].map((el) => el.dataset.topic);
+    $("#topicGrid").addClass("hidden");
+    $("#topicGrid").empty();
+  }
+
+  textarea.value = "";
+  document.querySelectorAll(".chip, .prompt-pill").forEach((x) => { x.disabled = false; });
+  textarea.value = "";
+
+  // 최초 채팅 시작이 아닌경우 먼저 사용자 메시지 화면에 append
+  var sessionId = chatState.session_id ? chatState.session_id : null;
+  if(sessionId) {
+      userMessageAppend(text);
+  }
+
+  var params = {
+    user_id: loginUser.user_id,
+    message: text,
+    insurance_name: chatState.compare ? "compare" : chatState.insurance,
+    chat_id: chatState.chat_id ? chatState.chat_id : null,
+    session_id: chatState.session_id ? chatState.session_id : null,
+    comparison_criteria: selectedTopics
+  };
+  // api로 메세지 보내는 부분
+  apiRequest("/chat/send/", "POST", params).then((response) => {
+      // 최초 메시지 전송 시에만 user message append (session_id가 없을 때)
+      if(!chatState.chat_id) {
+        const currentUrl = new URL(window.location.href);
+        currentUrl.searchParams.append('chat_id', response['chat_id']);
+
+        // URL 업데이트 (페이지 리로드 포함)
+        window.location.href = currentUrl.toString();
+      }
+      bot_message = response['bot_message'];
+      botMessageAppend(bot_message.answer); // response.bot_reply는 챗봇의 답변이라고 가정
+
+      // response에 claim_form, compare_table, related_questions가 있는 경우
+      if (bot_message.claim_form) {
+        fileMessageAppend(bot_message.claim_form);
+      }
+      if (bot_message.compare_table) {
+        // 챗봇 답변 아래에 비교 테이블 추가하는 함수 호출
+        compareTableAppend(bot_message.compare_table);
+      }
+      if (bot_message.related_questions) {
+        // 챗봇 답변 아래에 관련 질문 리스트 추가하는 함수 호출
+        relatedQuestionsAppend(bot_message.related_questions);
+      }
+    }).catch((error) => {
+      // 메시지 전송 실패 시의 처리
+      console.error("Failed to send message:", error);
+      openAlert("Failed to send message. Please try again.");
+    });
+}
+
+function loadChatHistory_dtl(chat_id) {
+  var params = {
+    chat_id: chat_id,
+    insurance_name: chatState.insurance ? chatState.insurance : "compare"
+  };
+  // chat_id에 해당하는 대화 기록을 불러와서 화면에 렌더링하는 함수
+  apiRequest(`/chat/detail/`, "POST", params).then((response) => {
+    chatState.session_id = response.session_id; // 서버에서 세션 ID 받아오기
+    renderChatHistory_dtl(response.messages);
+  }).catch((error) => {
+    console.error("Failed to load chat history:", error);
+    openAlert("Failed to load chat history. Please try again.");
+  });
+}
+
+function renderChatHistory_dtl(history_list) {
+  const stage = document.getElementById("chat_stage");
+  stage.innerHTML = "";
+  renderBottomInput();
+  history_list.forEach((entry) => {
+    if (entry.bot_yn === "N") {
+      userMessageAppend(entry.chat_content);
+    } else if (entry.bot_yn === "Y") {
+      botMessageAppend(entry.chat_content);
+      // response에 claim_form, compare_table, related_questions가 있는 경우
+      content_all = entry.chat_content_all;
+      if (content_all.claim_form) {
+        fileMessageAppend(content_all.claim_form);
+      }
+      if (content_all.compare_table) {
+        // 챗봇 답변 아래에 비교 테이블 추가하는 함수 호출
+        compareTableAppend(content_all.compare_table);
+      }
+      if (content_all.related_questions) {
+        // 챗봇 답변 아래에 관련 질문 리스트 추가하는 함수 호출
+        relatedQuestionsAppend(content_all.related_questions);
+      }
+    }
+  });
+  bindChatInputEvents();
+}
+
+function renderChatHistory() {
+  // 대화 기록 리스트를 불러와서 화면에 렌더링하는 함수
+  apiRequest(`/chat/list/`, "GET").then((response) => {
+    $.each(response, function(idx, history) {
+      document.getElementById("historyList").innerHTML += (`
+        <div class="history-item" data-history-id="${history.chat_id}" onclick="window.location.href='${history.insurance_name === "Compare" ? `./chat?compare=true&chat_id=${history.chat_id}` : `./chat?insurance=${history.insurance_name}&chat_id=${history.chat_id}`}'">
+            <button class="history-btn" type="button">${history.reg_dt} - ${history.insurance_name}</button>
+            <button class="history-delete-btn" type="button" aria-label="Delete history" onclick="confirmDeleteHistory(event, this)">✕</button>
+        </div>
+      `);
+    });
+  }).catch((error) => {
+    console.error("Failed to load chat history:", error);
+    openAlert("Failed to load chat history. Please try again.");
+  });
+}
+
+function confirmDeleteHistory(event, button) {
+  if (event) event.stopPropagation();
+
+  const historyItem = button.closest(".history-item");
+  if (!historyItem) return;
+
+  const historyId = historyItem.dataset.historyId;
+  if (!historyId) return;
+
+  window.__selectedHistoryId = historyId;
+  openAlertSelect("Are you sure you want to delete this history?", "deleteHistory");
+}
+
+// 챗봇이 파일을 return 했을 때 메시지에 파일 첨부하는 함수
+function fileMessageAppend(claim_form) {
+  $.each(claim_form, function(idx, value) {
+    $("#chat_stage").append(`
+        <div class="file-attachment-wrap">
+          <button class="file-attachment" type="button" onclick="downloadAttachedFile('${value.claim_form_name}')">
+            <span class="file-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none">
+                <path d="M7 3.75h6.2L18.25 8.8V20a1.25 1.25 0 0 1-1.25 1.25H7A1.25 1.25 0 0 1 5.75 20V5A1.25 1.25 0 0 1 7 3.75Z" stroke="currentColor" stroke-width="1.8"></path>
+                <path d="M13 3.75V8.5h4.75" stroke="currentColor" stroke-width="1.8"></path>
+              </svg>
+            </span>
+            <span class="file-meta">
+              <span class="file-name">${value.claim_form_name}</span>
+              <!-- <span class="file-size">${value.file_type} · ${value.file_size}</span> -->
+            </span>
+          </button>
+        </div>`);
+  });
+}
+
+// 파일 다운로드 함수
+function downloadAttachedFile(fileName) {
+  // fastapi에서 파일 다운로드를 처리하는 엔드포인트로 요청을 보내는 함수
+  // fastapi 주소 가져오는 api 호출
+  apiRequest("/download-url/", "GET").then((response) => {
+    const downloadUrl = response.download_url; // fastapi에서 반환된 다운로드 URL
+    window.open(`${downloadUrl}/download/${chatState.insurance}/${fileName}`, "_blank");
+  }).catch((error) => {
+    console.error("Failed to get download URL:", error);
+    openAlert("Failed to download file. Please try again.");
+  });
+}
+
+// 챗봇 답변 아래에 비교 테이블 추가하는 함수
+function compareTableAppend(compare_table) {
+  $("#chat_stage").append(`
+    <div class="table-wrap">
+          <table class="compare-table">
+            <thead>
+              <tr>
+                ${compare_table.header.map(header => `<th>${header}</th>`).join("")}
+              </tr>
+            </thead>
+            <tbody>
+              ${compare_table.body.map(row => `
+                  <tr>
+                    ${row.map((cell, index) => 
+                      index === 0 ? `<th>${cell}</th>` : `<td>${cell}</td>`
+                    ).join("")}
+                  </tr>
+                `).join("")}
+            </tbody>
+          </table>
+        </div>`);
+}
+
+// 챗봇 답변 아래에 관련 질문 리스트 추가하는 함수
+function relatedQuestionsAppend(related_questions) {
+  $("#chat_stage").append(`
+      <div class="prompt-row message-row left">
+        ${related_questions.map(question => `<button class="prompt-pill" data-fill="${question}">${question}</button>`).join("")}
+      </div>`);
+    bindFillEvents();
+}
