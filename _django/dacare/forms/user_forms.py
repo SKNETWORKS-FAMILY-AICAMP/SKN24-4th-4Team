@@ -37,3 +37,9 @@ class UpdatePasswordForm(forms.Form):
             raise forms.ValidationError('New passwords do not match.')
 
         return cleaned_data
+    
+
+class WithdrawForm(forms.Form):
+    # 회원탈퇴 시 본인 확인용 비밀번호 필드
+    # 실제 해시 비교는 뷰에서 verify_password()로 처리
+    current_pw = forms.CharField(min_length=1, max_length=16)

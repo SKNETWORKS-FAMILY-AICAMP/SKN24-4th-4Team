@@ -466,12 +466,17 @@ function openWithdrawPasswordModal() {
   });
 }
 async function confirmWithdraw(password) {
+  // 수정: 키 이름을 'password' → 'current_pw'로 변경 (서버 WithdrawForm 필드명과 일치)
   await apiRequest("/user/withdraw/", "POST", {
-    password: password
+    current_pw: password
   });
-  /*closeAlert();*/
   closeModal();
-  window.location.href = "/dacare/";
+  // 수정: 즉시 redirect하면 사용자가 탈퇴 완료를 확인 못 함
+  //       → 성공 알림 표시 후 Confirm 클릭 시 랜딩 페이지로 이동
+  openAlert("Your account has been successfully deleted.");
+  document.querySelector("#alert-root .primary-btn").addEventListener("click", () => {
+    window.location.href = "/dacare/";
+  });
 }
 
 
