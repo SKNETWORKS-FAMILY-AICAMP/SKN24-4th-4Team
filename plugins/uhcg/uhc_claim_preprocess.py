@@ -1,6 +1,7 @@
 from pathlib import Path
 import json
 import re
+import sys
 import fitz
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
@@ -9,7 +10,9 @@ OUTPUT_DIR = BASE_DIR / "data" / "output" / "uhcg" / "uhc_claim_form"
 
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
-INSURER = "UnitedHealthcare Global"
+# 05.01 - "UnitedHealthcare Global" → "uhcg" 로 변경
+# ingest_to_db.py INSURER_TO_COLLECTION 매핑 키와 일치해야 uhcg_plans 컬렉션에 저장됨
+INSURER = "uhcg"
 DOCUMENT_TYPE = "claim_form"
 IS_LATEST = True
 
@@ -141,6 +144,11 @@ def main():
     print("claim PDF 개수:", len(claim_files))
     print("claim chunk 개수:", len(all_claim_chunks))
     print("저장 경로:", output_path)
+
+    # 05.01 - ChromaDB 적재 추가 (기존: JSON 저장만, claim 데이터가 uhcg_plans에 없었음)
+    sys.path.append(str(BASE_DIR))
+    from utils.ingest_to_db import ingest
+    ingest(all_claim_chunks)
 
 
 if __name__ == "__main__":
