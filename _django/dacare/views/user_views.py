@@ -65,8 +65,9 @@ def update_password(request):
     current_pw = form.cleaned_data['current_pw']
     new_pw = form.cleaned_data['new_pw']
 
+    # 비밀번호 재확인 안내 문구 변경
     if not verify_password(current_pw, user.user_pw):
-        return json_error('Please check the password', status=401)
+        return json_error('Password does not match', status=401)
 
     user.user_pw = hash_password(new_pw)
     user.is_temp_pw = 'N'
@@ -90,31 +91,19 @@ def withdraw(request):
     if data is None:
         return json_error('Invalid JSON format.')
 
-    # [수정] 기존 코드: from = ... → 'from'은 Python 예약어라 변수명 사용 불가 → SyntaxError 발생
-    #        이 오류 때문에 user_views 모듈 자체가 로드 안 돼서 서버 전체가 죽어 있었음
-    #        → WithdrawForm으로 입력값 검증 후 비밀번호를 꺼내도록 수정
     form = WithdrawForm(data)
 
-    # [추가] 비밀번호를 아예 안 보냈거나 형식이 틀리면 DB 조회도 하지 않고 즉시 거부
-    #        프론트에서 막더라도 서버에서도 반드시 검증해야 함
     if not form.is_valid():
         return json_error('Please enter your password.')
 
     password = form.cleaned_data['current_pw']
 
-    # [수정] 기존 코드: user를 꺼내기 전에 verify_password(password, user.user_pw) 호출
-    #        → user가 아직 정의되지 않아서 NameError 발생
-    #        → user를 먼저 조회해야 user.user_pw에 접근 가능하므로 순서를 앞으로 이동
     user = TblUser.objects.get(user_id=request.session['user_id'])
 
-    # 입력한 평문 비밀번호와 DB에 해시로 저장된 비밀번호를 비교
-    # 일치하지 않으면 401(인증 실패) 반환 → 탈퇴 차단
     if not verify_password(password, user.user_pw):
         return json_error('Incorrect password.', status=401)
 
-    # 비밀번호 검증 통과 → DB에서 유저 레코드 삭제
     user.delete()
-    # 서버 측 세션도 즉시 초기화 (로그인 상태 해제, 쿠키 무효화)
     request.session.flush()
     return json_success('Your account has been deleted.')
     

@@ -292,8 +292,7 @@ function openProfile() {
       }
 
       if (newPw !== newPwConfirm) {
-        newPwConfirmError.textContent = "Password does not match";
-        newPwConfirmInput.classList.add("input-error");
+        openAlert("Please check the new password");
         return;
       }
     }
