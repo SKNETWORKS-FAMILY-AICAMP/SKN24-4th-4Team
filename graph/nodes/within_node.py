@@ -33,23 +33,19 @@ import os     # OPENAI_API_KEY 환경변수 읽기
 
 from openai import OpenAI  # [수정] generate_node 대신 OpenAI 직접 import
 
-# [수정] call_llm_with_docs 제거, parse_compare_table 추가
+# parse_compare_table 추가
 from graph.nodes.retrieve_node import query_collection
 from utils.comparison import build_comparison_prompt, parse_compare_table
 from utils.schemas import InsuranceState
 
-# ──────────────────────────────────────────────────────────────
-# 상수
-# ──────────────────────────────────────────────────────────────
 
-# [수정] 지원 보험사 코드 집합 추가
-# 이유: insurer 슬롯에 엉뚱한 값이 들어왔을 때 일반 컬렉션으로 fallback하기 위함
+# 상수
+# 지원 보험사 코드 집합 추가
+#insurer 슬롯에 엉뚱한 값이 들어왔을 때 일반 컬렉션으로 fallback하기 위함
 _SUPPORTED_INSURERS = {"uhcg", "cigna", "tricare", "msh_china"}
 
-# [수정] 시스템 프롬프트 변경
-# 기존: 자연어 비교표 작성 요청
-# 변경: "반드시 JSON 만 반환" 을 명시
-# 이유: response_format={"type":"json_object"} 와 함께 일관성 유지
+# 시스템 프롬프트 변경
+# response_format={"type":"json_object"} 와 함께 일관성 유지
 _WITHIN_SYSTEM_PROMPT = """You are a health insurance plan comparison specialist.
 Compare the insurance plans based ONLY on the provided documents.
 You MUST respond with valid JSON only — no other text, no markdown.
@@ -57,9 +53,8 @@ Highlight key differences that would impact the user's decision.
 If information is missing for a plan, state "정보 없음"."""
 
 
-# ──────────────────────────────────────────────────────────────
+
 # 노드 함수
-# ──────────────────────────────────────────────────────────────
 
 def within(state: InsuranceState) -> dict:
     """
@@ -83,21 +78,18 @@ def within(state: InsuranceState) -> dict:
     slots    = state.get("slots", {})
 
     # insurer 유효성 검증 
-    # [수정] 기존: insurer 를 그대로 사용
-    # 변경: _validate_insurer() 로 지원 여부 확인 후 사용
+    #_validate_insurer() 로 지원 여부 확인 후 사용
     insurer = _validate_insurer(state)
 
     #비교할 플랜 목록 추출 
-    # [수정] 기존: slots.get("plan", "") 단일 플랜만 처리
-    # 변경: _resolve_plans() 로 단일/복수 플랜 모두 처리
+    # _resolve_plans() 로 단일/복수 플랜 모두 처리
     plans = _resolve_plans(slots)
 
     #  플랜별 RAG 검색 
-    # [수정] 기존: 인라인으로 구현된 검색 로직
-    # 변경: _search_per_plan() 로 분리 → 재사용 가능
+    #_search_per_plan() 로 분리 재사용 가능
     docs_by_plan, all_retrieved = _search_per_plan(insurer, plans, user_msg)
 
-    # ── Step 4: 비교 프롬프트 조립 
+    #비교 프롬프트 조립 
     # text_by_plan: {플랜명: [문서 텍스트, ...]} 형태로 변환
     text_by_plan: dict[str, list[str]] = {
         subject: [d["content"] for d in docs]
@@ -111,11 +103,11 @@ def within(state: InsuranceState) -> dict:
 
     # LLM 직접 호출 (JSON 강제) 
     # [수정]call_llm_with_docs() 사용 -> 자연어 텍스트 반환
-    # 변경: _call_llm_json() 사용 → response_format={"type":"json_object"} 적용
+    # _call_llm_json() 사용 ->  response_format={"type":"json_object"} 적용
     raw_response = _call_llm_json(comparison_prompt)
 
     # JSON 파싱 
-    # [수정] parse_compare_table() 로 (compare_table, answer, related_questions) 추출
+    # parse_compare_table() 로 (compare_table, answer, related_questions) 추출
     compare_table, answer, related_questions = parse_compare_table(raw_response)
 
     # sources 추출 

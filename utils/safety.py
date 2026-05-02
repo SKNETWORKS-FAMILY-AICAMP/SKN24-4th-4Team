@@ -20,6 +20,11 @@ _BLOCKED_KEYWORDS = [
     "詐欺", "폭력", "테러",
 ]
 
+ALLOWED_KEYWORDS=[
+    "보험", "의료비", "치료비", "병원비","진료비", "청구", "청구비", "본인부담금", "공제액", "copay",
+    "usd", "보장일", "만료일", "환율","한화", "원화", "krw", "eur", "jpy", "deductible"
+]
+
 # LLM 안전 검사 프롬프트
 _SAFETY_SYSTEM_PROMPT = """You are a content safety classifier for a health insurance assistant.
 Respond with ONLY "safe" or "blocked".
@@ -48,6 +53,15 @@ def check_blocked(text: str) -> str:
         차단 사유 메시지 (str) — 차단된 경우
         빈 문자열 ""            — 안전한 경우 (계속 진행)
     """
+    # 허용 키워드
+    text_lower=text.lower()
+    ALLOWED_KEYWORDS=[
+        "보험", "의료비", "치료비", "병원비","진료비", "청구", "청구비", "본인부담금", "공제액", "copay",
+        "usd", "보장일", "만료일", "환율","한화", "원화", "krw", "eur", "jpy", "deductible"
+    ]
+    if any(keword in text_lower for keword in ALLOWED_KEYWORDS):
+        return None
+    
     if not text or not text.strip():
         return "빈 메시지입니다."
 
@@ -60,6 +74,7 @@ def check_blocked(text: str) -> str:
     # ── 2단계: LLM 심층 검사 ──────────────────────────────────
     if _llm_is_blocked(text):
         return _blocked_response()
+    
 
     return ""  # 안전
 

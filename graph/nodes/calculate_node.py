@@ -51,6 +51,7 @@ def calculate(state: InsuranceState) -> dict:
             "currency"  : 통화 코드 (없으면 "USD"),
             "deductible": 공제액 (없으면 0),
             "copay_rate": 공동부담률 0.0~1.0 (없으면 0.2),
+            "date" : 환율 기준일(예: "2025-03-15", 없으면 "")
         }
 
     반환 dict (InsuranceState 업데이트):
@@ -63,13 +64,22 @@ def calculate(state: InsuranceState) -> dict:
     insurer  = state.get("insurer", "")
     slots    = state.get("slots", {})
 
-    # ── Step 1: 슬롯에서 계산 파라미터 추출 ───────────────────
+    # 슬롯에서 계산 파라미터 추출 
     amount     = float(slots.get("amount", 0))
     currency   = str(slots.get("currency", "USD")).upper()
     deductible = float(slots.get("deductible", 0))
     copay_rate = float(slots.get("copay_rate", 0.2))
+    rate_date=str(slots.get("date", "") or "")
+    plan=str(slots.get("platn", "") or "")
 
-    # ── Step 2: 환율 조회 및 계산 ─────────────────────────────
+    # 플랜별 계산 정보가 필요한 경우 (조건 분기 추가)
+    if amount > 0 and insurer and not plan:
+        return {
+            "calc_result": {},
+            "retrieved_docs": [],
+            "answer": ("보험사별/플랜별 공제액(deductible), 본인부담률(copay/consurance),보장 범위가 달라질 수 있습니다. 정확한 계산을 위해 가입한 플랜명을 알려주세요.")
+        }
+    #  환율 조회 및 계산 
     if amount > 0:
         # 금액이 명시된 경우 — 본인부담금 + KRW 환산 계산
         calc_result = calculate_copay(
@@ -77,24 +87,29 @@ def calculate(state: InsuranceState) -> dict:
             currency     = currency,
             deductible   = deductible,
             copay_rate   = copay_rate,
+            rate_date= rate_date,
         )
     else:
         # 금액 미명시 — 환율만 조회
-        rate = get_exchange_rate(currency)
+        rate = get_exchange_rate(currency, rate_date)
         calc_result = {
             "currency"     : currency,
             "exchange_rate": rate,
+            "rate_date": rate_date or "latest",
             "note"         : "금액이 명시되지 않아 환율 정보만 제공합니다.",
         }
 
-    # ── Step 3: 보험 컨텍스트 RAG 검색 ────────────────────────
+    # 보험 컨텍스트 RAG 검색 
     # 공제액·부담률 근거 문서를 함께 제공하기 위해 검색
-    collection  = f"{insurer}_plans" if insurer and insurer != "nhis" else "general_guidelines"
-    context_docs = query_collection(
-        collection_name = collection,
-        query           = f"deductible copay rate cost sharing {user_msg}",
-        top_k           = 3,
-    )
+    if insurer and insurer !="nhis":
+        collection=f"{insurer}_plans"
+        context_docs = query_collection(
+            collection_name = collection,
+            query           = f"deductible copay rate cost sharing {user_msg}",
+            top_k           = 3,
+        )
+    else:
+        context_docs=[]
 
     # ── Step 4: LLM 으로 계산 결과 설명 생성 ──────────────────
     calc_summary = _format_calc_result(calc_result)

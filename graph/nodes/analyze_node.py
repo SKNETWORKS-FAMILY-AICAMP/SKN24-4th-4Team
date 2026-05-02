@@ -67,7 +67,10 @@ Respond ONLY with valid JSON in this exact format:
     "treatment"  : "treatment type or empty",
     "amount"     : 0,
     "currency"   : "USD or empty",
-    "region"     : "region or empty"
+    "region"     : "region or empty",
+    "date":"YYYY-MM-DD format or empty",
+    "deductible": 0,
+    "copay_rate": 0.2
   },
   "missing_slots": ["list of required but missing slot names"]
 }
@@ -75,6 +78,11 @@ Respond ONLY with valid JSON in this exact format:
 Rules:
 - intents[0] is the PRIMARY intent used for routing
 - For calculation: extract amount and currency from slots if mentioned
+- For calculation: extract amount, currency, and date if mentioned.
+- Convert Korean dates like "2025년 3월 15일" to "2025-03-15".
+- If users asks "한화로 얼마야",  classify as caluction.
+- IF the user mentions an insurer or plan, extract insurer and plan
+- Extract date from user query if presendt
 - For cross_compare: list all mentioned insurers in insurers[]
 - missing_slots should list slots that are REQUIRED but not provided by user
 - If truly ambiguous, use "clarify" as the intent"""
@@ -130,7 +138,7 @@ def analyze(state: InsuranceState) -> dict:
 
     # ── Step 3: Intent Router (LLM) ────────────────────────────
     analysis = _run_intent_router(user_msg)
-
+    print("[DEBUG] analysis raw:", analysis)    # test_graph.py 확인용 필요시 주석 처리
     intents  = analysis.get("intents", [Intent.CLARIFY])
     primary  = intents[0] if intents else Intent.CLARIFY
 

@@ -77,3 +77,7 @@ evaluation/results/
 finetuning/checkpoints/
 finetuning/output/
 
+# test 파일
+test_compare.py
+test_graph.py
+test_within.py

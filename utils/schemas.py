@@ -47,7 +47,8 @@ class InsuranceState(TypedDict):
                                 # "uhcg" | "cigna" | "tricare" | "msh_china" | "nhis" | ""
     insurers     : list         # 복수 보험사 코드 리스트 (파이프라인 ② 용)
     slots        : dict         # 추출된 슬롯
-                                # {"plan": "Gold", "treatment": "입원", "amount": 5000, ...}
+                                # {"plan": "Gold", "treatment": "입원", "amount": 5000, 
+                                #  "currency": "USD", "date": "2025-03-15","deductible:0, "copay_rate":0.2}
     missing_slots: list         # 아직 확인되지 않은 필수 슬롯 목록
                                 # 비어있으면 모든 슬롯 충족 → 바로 처리 가능
 

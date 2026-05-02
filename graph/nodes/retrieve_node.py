@@ -12,18 +12,11 @@ from __future__ import annotations
 from pathlib import Path
 import chromadb
 from chromadb.config import Settings
-# 05.01 - SentenceTransformerEmbeddingFunction 제거
-# ingest_to_db.py는 HuggingFaceEmbeddings로 임베딩을 직접 넣기 때문에
-# ChromaDB 컬렉션에 embedding_function이 등록되어 있지 않다(persisted: default).
-# get_collection()에 다른 embedding_function을 전달하면 충돌 경고와 함께
-# query_texts 기반 검색이 실패해 retrieved_docs가 항상 0이 됨.
-# 쿼리도 ingest와 동일하게 HuggingFaceEmbeddings로 직접 임베딩 후 query_embeddings로 전달.
+
 from langchain_huggingface import HuggingFaceEmbeddings
 
 # 상수
-# __file__ 기준 절대경로 사용 → CWD(현재 작업 디렉토리)와 무관하게 동작
-# retrieve_node.py 위치: Dacare_LLM/graph/nodes/retrieve_node.py
-# vectordb 위치:         Dacare_LLM/vectordb/
+
 _PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 VECTORDB_PATH = str(_PROJECT_ROOT / "vectordb")
 DEFAULT_TOP_K = 5   # 기본 검색 결과 수
@@ -68,14 +61,9 @@ def query_collection(
             path     = VECTORDB_PATH,
             settings = Settings(anonymized_telemetry=False),
         )
-        # 05.01 - embedding_function 인자 제거
-        # ingest_to_db.py가 embeddings를 직접 col.add()로 넣기 때문에
-        # ChromaDB가 기록한 embedding_function은 'default'(none).
-        # 여기에 다른 함수를 넘기면 충돌 경고 후 query_texts 검색 실패.
+
         collection = client.get_collection(name=collection_name)
 
-        # 05.01 - query_texts → query_embeddings 로 변경
-        # ingest와 동일한 BGE-M3 모델로 쿼리를 직접 임베딩해서 전달
         model       = _get_embedding_model()
         query_vec   = model.embed_query(query)
 

@@ -33,9 +33,7 @@ from graph.nodes.retrieve_node import query_multi_collections
 from utils.comparison import build_comparison_prompt, parse_compare_table, rerank_by_relevance
 from utils.schemas import InsuranceState
 
-# ──────────────────────────────────────────────────────────────
 # 상수
-# ──────────────────────────────────────────────────────────────
 _CROSS_SYSTEM_PROMPT = """You are a health insurance comparison specialist.
 Compare the insurance companies based ONLY on the provided documents.
 You MUST respond with valid JSON only — no other text, no markdown.
@@ -116,7 +114,7 @@ def compare(state: InsuranceState) -> dict:
     #  JSON 파싱 
     compare_table, answer, related_questions = parse_compare_table(raw_response)
 
-    #  sources 추출
+    # sources 추출
     # 05.01 - file_name → source 로 변경 (팀 공통 메타데이터 형식: source = 파일명)
     sources = [
         {
