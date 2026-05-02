@@ -1,0 +1,473 @@
+*{box-sizing:border-box}
+:root{
+  --blue:#3f95f2;
+  --blue-dark:#1b65c2;
+  --soft-blue:#eef8ff;
+  --sky:#e7f6ff;
+  --side:#e9f8ff;
+  --line:#d8e4ee;
+  --text:#222;
+  --muted:#6d7782;
+  --white:#fff;
+  --shadow:0 10px 28px rgba(58,103,155,.08);
+}
+html,body{
+  margin:0;padding:0;min-height:100%;
+  font-family:Arial, Helvetica, sans-serif;color:var(--text);background:#f4f7fb;
+}
+button,input,textarea{font:inherit}
+button{cursor:pointer}
+img{display:block;max-width:100%}
+.hidden{display:none!important}
+
+.landing-page{
+  min-height:100vh;
+  position:relative;
+  background-image:url("../images/background.png");
+  background-size:cover;
+  background-position:center;
+  overflow:hidden;
+}
+.landing-header{
+  position:absolute;left:24px;right:24px;top:18px;
+  display:flex;align-items:flex-start;justify-content:space-between;
+}
+.brand-logo{
+  width:220px;
+}
+.header-actions{
+  display:flex;gap:16px;align-items:center;font-size:14px;
+}
+.header-actions .link-btn{
+  background:transparent;border:none;color:#222;
+}
+.header-actions .pill-btn{
+  background:#fff;border:1px solid #ddd;border-radius:999px;padding:10px 16px;
+}
+.hero-wrap{
+  min-height:100vh;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  align-items:center;
+  padding:120px 86px 110px;
+  gap:30px;
+}
+.hero-copy h1{
+  margin:0;
+  font-family:Georgia, "Times New Roman", serif;
+  color:#4a378d;
+  font-size:clamp(44px,3vw,70px);
+  line-height:1.13;
+  font-weight:500;
+  width: 1200px;
+}
+.hero-copy p{
+  margin:28px 0 0;
+  font-size:20px;color:#666;
+}
+.hero-actions{
+  display:flex;gap:14px;flex-wrap:wrap;margin-top:26px;
+}
+.primary-btn,.secondary-btn,.ghost-btn{
+  transition:.18s transform,.18s box-shadow,.18s background;
+}
+.ghost-btn{
+    border: solid 1px lightgray;
+}
+/*.primary-btn:hover,.secondary-btn:hover,.ghost-btn:hover,.chip:hover,.insurance-card:hover,.prompt-pill:hover{
+  transform:translateY(-1px);*/
+.primary-btn:hover,.secondary-btn:hover,.ghost-btn:hover,.chip:hover,.insurance-card:hover{
+  border-color: #3b82f6;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); /*그림자 깊이*/
+  transform: translateY(-4px);
+}
+.prompt-pill:hover{
+  transform:translateY(-1px);
+}
+.primary-btn{
+  background:var(--blue);
+  color:#fff;border:none;border-radius:12px;padding:13px 22px;font-weight:700;
+  box-shadow:0 8px 18px rgba(63,149,242,.24);
+}
+.secondary-btn{
+  background:#fff;color:#444;border:1px solid #d1dbe3;border-radius:12px;padding:13px 22px;
+}
+/*uiverse.io 템플릿 코드로 Sign in, Sign up 버튼 효과 넣음*/
+.fancy-btn {
+  position: relative;
+  overflow: visible;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.fancy-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 18px rgba(76, 131, 250, 0.18);
+}
+
+.fancy-btn .star {
+  position: absolute;
+  font-size: 10px;
+  line-height: 1;
+  color: #4c83fa;
+  opacity: 0;
+  pointer-events: none;
+  transform: scale(0.3) rotate(0deg);
+}
+
+/* 기본 위치: 버튼 안쪽에 숨어 있게 */
+.fancy-btn .star-1 {
+  top: 55%;
+  left: 35%;
+  transition: all 0.7s cubic-bezier(0.05, 0.83, 0.43, 0.96);
+}
+
+.fancy-btn .star-2 {
+  top: 50%;
+  left: 50%;
+  font-size: 8px;
+  transition: all 0.9s cubic-bezier(0, 0.4, 0, 1.01);
+}
+
+.fancy-btn .star-3 {
+  top: 60%;
+  left: 62%;
+  font-size: 7px;
+  transition: all 0.8s cubic-bezier(0, 0.4, 0, 1.01);
+}
+
+.fancy-btn .star-4 {
+  top: 45%;
+  left: 70%;
+  font-size: 9px;
+  transition: all 0.75s cubic-bezier(0, 0.4, 0, 1.01);
+}
+
+/* hover 시 각자 다른 방향으로 퍼지게 */
+.fancy-btn:hover .star-1 {
+  top: -12px;
+  left: -6px;
+  opacity: 1;
+  transform: scale(1.15) rotate(12deg);
+}
+
+.fancy-btn:hover .star-2 {
+  top: -16px;
+  left: 28%;
+  opacity: 1;
+  transform: scale(0.95) rotate(-18deg);
+}
+
+.fancy-btn:hover .star-3 {
+  top: 60%;
+  left: 88%;
+  opacity: 1;
+  transform: scale(0.85) rotate(20deg);
+}
+
+.fancy-btn:hover .star-4 {
+  top: 85%;
+  left: 62%;
+  opacity: 1;
+  transform: scale(1.05) rotate(-10deg);
+}
+.illustration{
+  justify-content:center;align-items:center;
+  position: absolute;
+  left: 800px;
+}
+.illustration img{
+  width:min(100%, 760px);
+  filter:drop-shadow(0 12px 20px rgba(83,110,170,.06));
+}
+.logo-strip{
+  position:absolute;left:70px;right:70px;bottom:70px;
+  display:grid;grid-template-columns:repeat(4,1fr);gap:32px;align-items:end;
+}
+.logo-strip img{
+  max-height:110px;object-fit:contain;justify-self:center;
+}
+
+.app-shell{
+  min-height:100vh;
+  display:grid;
+  grid-template-columns:220px 1fr;
+  background:#fff;
+}
+.sidebar{
+  background:var(--side);
+  border-right:1px solid #d7ebf5;
+  position:relative;
+}
+.sidebar-top{padding:10px 10px 0}
+.sidebar .mini-logo{
+  width:72px;
+}
+.new-chat{
+  display:flex;align-items:center;gap:8px;
+  color:#013F8B;background:none;border:none;
+  font-weight:700;font-size:19px;padding:16px 14px;
+}
+.history{
+  position:absolute;left:0;right:0;bottom:54px;padding:0 10px;
+}
+.history h4{
+  margin:0 0 10px;font-size:16px;color:#2e4f79;
+}
+.history-item{
+  color:#2d62b8;font-size:10px;line-height:1.9;
+}
+.side-footer{
+  position:absolute;left:0;right:0;bottom:8px;
+  border-top:1px solid #cde2ee;
+  display:flex;align-items:center;justify-content:space-between;
+  gap:8px;padding:6px 10px 0;font-size:11px;
+}
+.side-footer button{
+  background:none;border:none;padding:0;color:#333;display:flex;align-items:center;gap:4px;
+}
+.side-footer img{
+  width:12px;height:12px;
+}
+
+.main-panel{
+  min-height:100vh;
+  padding:12px 18px 84px;
+  position:relative;
+}
+.notice-bar{
+  margin:2px 22px 0;
+  padding:8px 18px;border:1px solid #ddd;border-radius:999px;
+  font-size:10px;color:#666;text-align:center;
+}
+.center-stage{
+  max-width:1200px;margin:0 auto;
+}
+.insurance-title,.chat-empty-title{
+  color:#4289e0;text-align:center;font-size:50px;font-weight:700;margin-top:148px;
+}
+.insurance-grid{
+  margin-top:42px;
+  display:grid;grid-template-columns:repeat(4,1fr);gap:26px;align-items:center;
+}
+.insurance-card{
+  /*background:transparent;border:1px solid transparent;border-radius:18px;padding:14px;min-height:150px;
+  display:flex;align-items:center;justify-content:center;*/
+  background-color: #ffff;
+  border:1px solid #ccccc6;
+  border-radius:16px;
+  padding:32px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  transition: all 0.5s ease-in-out; /* 전환 효과 */
+  min-height:150px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor: pointer; /*마우스커서*/
+}
+.insurance-card.active{
+  background:#f3f9ff;border-color:#b8d9ff;
+}
+.insurance-card img{
+  max-width:100%;max-height:110px;object-fit:contain;
+}
+.insurance-actions{
+  text-align:center;margin-top:28px;
+}
+.search-bar{
+  width:min(650px, 80%);height:22px;border-radius:999px;background:#e7f7ff;
+  margin:22px auto 0;position:relative;border:1px solid #d3eef9;
+}
+.search-bar::after{
+  content:"";width:12px;height:12px;border-radius:50%;background:#adcfd9;
+  position:absolute;right:8px;top:4px;
+}
+.prompt-row{
+  margin:26px auto 0;display:flex;justify-content:center;gap:16px;flex-wrap:wrap;
+}
+.prompt-pill{
+  min-width:110px;padding:8px 14px;border-radius:999px;border:1px solid #ddd;background:#fff;font-size:10px;color:#333;
+}
+.chat-view{
+  max-width:1050px;margin:0 auto;padding-top:18px;
+}
+.message-row{
+  display:flex;margin-top:18px;
+}
+.message-row.right{justify-content:flex-end}
+.message-row.left{justify-content:flex-start}
+.message-bubble-right{
+  max-width:540px;border-radius:16px;border:1px solid #e4e4e4;background:#f8f8f8;
+  padding:12px 14px;font-size:11px;line-height:1.55;color:#555;
+}
+.message-bubble-left{
+  max-width:620px;border-radius:16px;border:1px solid #d7eef8;background:#edf8ff;
+  padding:14px 15px;font-size:11px;line-height:1.62;color:#2c3e55;
+}
+.ask-line{
+  display:flex;align-items:center;gap:10px;font-size:11px;font-weight:700;color:#275a92;
+}
+.ask-avatar{
+  width:18px;height:18px;border-radius:50%;background:#59a9ff;color:#fff;
+  display:flex;align-items:center;justify-content:center;font-size:10px;
+}
+.center-caption{
+  text-align:center;color:#666;font-size:10px;margin-top:12px;
+}
+.attach-file{
+  display:flex;align-items:center;gap:10px;margin-top:10px;font-size:11px;color:#333;
+}
+.tags-row{
+  display:flex;flex-wrap:wrap;gap:8px;margin-top:16px;padding-left:28px;
+}
+.chip{
+  border:1px solid #cfdce8;background:#fff;color:#555;border-radius:999px;
+  padding:8px 14px;font-size:10px;
+}
+.chip.active{
+  background:var(--blue);border-color:transparent;color:#fff;
+  box-shadow:0 2px 8px rgba(63,149,242,.18);
+}
+.bottom-input-wrap{
+  position:fixed;left:154px;right:18px;bottom:12px;z-index:5;
+}
+.bottom-input{
+  max-width:1200px;margin:0 auto;
+  height:42px;border-radius:999px;background:#e7f7ff;border:1px solid #d7eef7;
+  display:flex;align-items:center;gap:10px;padding:0 12px;
+}
+.icon-btn{
+  border:none;background:none;color:#66b6de;font-size:13px;display:flex;align-items:center;justify-content:center;
+}
+.upload-label{
+  display:flex;align-items:center;justify-content:center;
+}
+.upload-name{
+  max-width:200px;font-size:10px;color:#5c7185;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.chat-input{
+  flex:1;border:none;background:transparent;outline:none;font-size:12px;color:#3b5268;
+}
+.send-btn{
+  width:24px;height:24px;border-radius:50%;border:none;background:#a7cfd8;color:#fff;font-size:12px;
+}
+
+.backdrop{
+  position:fixed;inset:0;background:rgba(30,36,45,.34);backdrop-filter:blur(3px);z-index:20;
+}
+.modal{
+  position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);
+  z-index:21;background:#fff;border:1px solid #cfcfcf;border-radius:28px;box-shadow:var(--shadow);
+}
+.modal.large{width:min(760px,92vw);padding:24px 24px 26px;max-height:90vh;overflow:auto}
+.modal.medium{width:min(560px,92vw);padding:24px 24px 26px}
+.modal.small{width:min(440px,92vw);padding:30px 24px}
+.close-btn{
+  position:absolute;right:18px;top:12px;background:none;border:none;padding:0;
+}
+.close-btn img{
+  width:28px;height:28px;object-fit:contain;
+}
+.modal-title{
+  text-align:center;font-size:16px;font-weight:700;margin:8px 0 22px;
+}
+.modal-title.big{
+  font-size:34px;margin-top:20px;
+}
+.terms-box{
+  border:1px solid #c7c7c7;padding:12px;font-size:11px;line-height:1.52;margin-bottom:16px;
+}
+.form-field{
+  margin-bottom:20px;
+}
+.form-field label{
+  display:block;font-size:15px;margin-bottom:8px;
+}
+.form-input, .form-textarea{
+  width:100%;border:1px solid #d4d4d4;border-radius:8px;background:#fff;
+  padding:10px 12px;
+}
+.form-input{height:42px}
+.form-input.gray{background:#b7b7b7}
+.form-textarea{height:110px;resize:vertical}
+.hr{
+  height:1px;background:#d2d2d2;margin:18px 0;
+}
+.check-row{
+  display:flex;align-items:center;gap:12px;font-size:13px;margin:8px 0 22px;
+}
+.check-row input{
+  width:18px;height:18px;
+}
+.linklike{
+  border:none;background:none;color:#4a8ee8;text-decoration:underline;padding:0;
+}
+.modal-actions{
+  display:flex;justify-content:center;gap:14px;flex-wrap:wrap;
+}
+.option-btn{
+  width:100%;height:38px;border-radius:8px;font-size:12px;border:1px solid #c8c8c8;margin-bottom:10px;
+}
+.option-btn.active{outline:2px solid #7eb8ff}
+.o1{background:#dfeaf8;border-color:#8ca8d2}
+.o2{background:#deedda;border-color:#98b88d}
+.o3{background:#f6ecd3;border-color:#d2b459}
+.o4{background:#f7e6d7;border-color:#d3a64f}
+.o5{background:#f6d7d7;border-color:#cf8f8f}
+.alert-text{
+  text-align:center;font-size:15px;margin-top:8px;line-height:1.6;
+}
+.modal .primary-btn{
+  border:none;
+}
+.icon-inline{
+  width:14px;height:14px;object-fit:contain;
+}
+.small .primary-btn{
+  display:block;margin:26px auto 0;
+}
+
+@media (max-width: 980px){
+  .hero-wrap{
+    grid-template-columns:1fr;
+    padding:120px 32px 180px;
+    align-items:start;
+  }
+  .landing-header{
+    left:14px;right:14px;
+  }
+  .brand-logo{width:180px}
+  .hero-copy h1{font-size:32px}
+  .illustration img{width:min(100%, 620px)}
+  .logo-strip{
+    position:static;
+    padding:0 20px 40px;
+    margin-top:-40px;
+    grid-template-columns:repeat(2,1fr);
+  }
+  .app-shell{
+    grid-template-columns:220px 1fr;
+  }
+  .bottom-input-wrap{
+    left:122px;
+  }
+  .insurance-grid{
+    grid-template-columns:repeat(2,1fr);
+  }
+}
+
+/*error*/
+.error-text {
+  min-height: 20px;
+  margin-top: 8px;
+  color: #e74c3c;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.input-error {
+  border: 2px solid #e74c3c !important;
+}
+
+.form-input::placeholder {
+  color: #9a9a9a;
+}

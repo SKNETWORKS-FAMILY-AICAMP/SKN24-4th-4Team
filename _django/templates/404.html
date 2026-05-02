@@ -1,0 +1,23 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>404 - Page Not Found</title>
+  <link rel="stylesheet" href="{% static 'css/styles.css' %}" />
+  <link rel="icon" href="{% static 'images/favicon.ico' %}" />
+</head>
+<body>
+  <main class="error-404-page">
+    <section class="error-404-card">
+      <h1 class="error-404-title">404 Page not found</h1>
+      <p class="error-404-text">
+        The page you requested does not exist or has been moved.<br />
+        Please go back to the main page and try again.
+      </p>
+      <button class="primary-btn" onclick="window.location.href='/dacare/'">Go to main</button>
+    </section>
+  </main>
+</body>
+</html>
