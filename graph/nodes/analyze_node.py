@@ -124,6 +124,9 @@ def analyze(state: InsuranceState) -> dict:
             ),
         }
 
+    request_insurer = _normalize_insurer(state.get("insurer", ""))
+    if(request_insurer == "") :
+        user_msg += state.get("comparison_criteria", "")
     # ── Step 1: 안전 필터 ──────────────────────────────────────
     blocked_msg = check_blocked(user_msg)
     if blocked_msg:
@@ -159,9 +162,20 @@ def analyze(state: InsuranceState) -> dict:
 
     # ── Step 3: Intent Router (LLM) ────────────────────────────
     analysis = _run_intent_router(user_msg)
-
-    request_insurer = _normalize_insurer(state.get("insurer", ""))
+    
     analysis_insurer = _normalize_insurer(analysis.get("insurer", ""))
+
+    # 🔥 request.insurer == "compare"이면 compare_node로 강제 라우팅
+    if request_insurer == "compare":
+        return {
+            "language": language,
+            "intent": Intent.CROSS_COMPARE,
+            "intents": [Intent.CROSS_COMPARE],
+            "insurer": "compare",
+            "insurers": ["uhcg", "cigna", "tricare", "msh_china"],
+            "slots": analysis.get("slots", {}),
+            "missing_slots": [],
+        }
 
     final_insurer = request_insurer or analysis_insurer
 
