@@ -39,56 +39,21 @@ def save_chat_detail(
 
 def call_fastapi_chat_server(message, user_id, session_id, insurer, comparison_criteria=None):
     payload = {
-        'user_id': user_id,
-        'session_id': session_id,
-        'message': message,
-        'insurance_name': insurer,
-        'comparison_criteria': comparison_criteria
+        "user_id": user_id,
+        "session_id": session_id,
+        "insurer": insurer.lower(),
+        "message": message,
+        "comparison_criteria": comparison_criteria or [],
     }
 
     # 김수진 여기
-    # response = requests.post(
-    #     settings.FASTAPI_CHAT_URL + '/chat',
-    #     json=payload,
-    #     timeout=60
-    # )
-    # response data 예시
-    response = {
-        "answer": "답변 내용",
-        "sources": [
-            {
-                "document_name": "cigna_benefit_guide.pdf",
-                "page": 12,
-                "section": "Outpatient Treatment"
-            }
-        ],
-        "claim_form":[
-            {
-                "claim_form_path": "/static/forms/cigna_claim_form.pdf",
-                "claim_form_name":"cigna_claim_form.pdf",
-                "claim_form_ext":"pdf"
-            }
-        ],
-
-        "compare_table":{
-            "header" : ["Comparison Criteria", "UHCG ", "Cigna ", "Tricare ", "MSH China (Standard)"],
-            "body" : [
-                ["Annual Coverage Limit", "$1,000,000",  "$2,500,000", "Unlimited (Network)", "$1,500,000"],
-                ["Cost-Sharing Structure", "$1,000,000",  "$2,500,000", "Unlimited (Network)", "$1,500,000"],
-                ["Outpatient Coverage", "$1,000,000",  "$2,500,000", "Unlimited (Network)", "$1,500,000"],
-                ["Maternity and Prenatal Coverage", "$1,000,000",  "$2,500,000", "Unlimited (Network)", "$1,500,000"]
-            ]
-        },
-        "related_questions": [
-            "What documents are needed for a claim?",
-            "Does this benefit require pre-authorization?",
-            "What is the annual outpatient limit?"
-        ]
-    }
-    # response.raise_for_status()
-    # return response.json()
-    # response = json.dumps(response)
-    return response
+    response = requests.post(
+        settings.FASTAPI_CHAT_URL + '/chat',
+        json=payload,
+        timeout=600
+    )
+    response.raise_for_status()
+    return json.loads(response.text)
 
 
 def send_chat_message(user_id, message, insurance_name, chat_id=None, comparison_criteria=None, session_id=None):
