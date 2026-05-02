@@ -31,7 +31,7 @@ from __future__ import annotations
 import json   # LLM fallback 응답 직렬화에 사용
 import os     # OPENAI_API_KEY 환경변수 읽기
 
-from openai import OpenAI  # [수정] generate_node 대신 OpenAI 직접 import
+from openai import OpenAI  # OpenAI 직접 import
 
 # parse_compare_table 추가
 from graph.nodes.retrieve_node import query_collection

@@ -20,7 +20,7 @@ import requests
 # ──────────────────────────────────────────────────────────────
 
 # ExchangeRate-API 엔드포인트 (기준 통화 → 전체 환율 조회)
-_API_BASE = "https://api.frankfurter.app/"
+_API_BASE = "https://api.frankfurter.dev/v2/rates"
 
 # 기준 통화 (KRW 으로 환산)
 _BASE_CURRENCY = "KRW"
@@ -69,7 +69,7 @@ def get_exchange_rate(currency: str, rate_date:str="") -> float:
     try:
         params={
             "base":currency,
-            "symbols": "KRW",
+            "quotes": "KRW",
         }
         if rate_date:
             params["date"]=rate_date
@@ -77,9 +77,11 @@ def get_exchange_rate(currency: str, rate_date:str="") -> float:
         resp=requests.get(_API_BASE, params=params, timeout=5)
         resp.raise_for_status()
         data=resp.json()
-
-        rate=float(data["rates"]["KRW"])
-        _rate_cache[cache_key] = (rate, time.time())
+        krw_row=next((item for item in data if item.get("quote")=="KRW"), None)
+        if not krw_row:
+            return ValueError("KRW 환율 데이터가 응답에 없습니다.")
+        rate=float(krw_row["rate"])
+        _rate_cache[cache_key] = (rate, time.time())    
         return rate
         
     except Exception as e:
