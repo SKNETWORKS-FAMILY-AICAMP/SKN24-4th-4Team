@@ -142,35 +142,39 @@ def analyze(state: InsuranceState) -> dict:
     intents  = analysis.get("intents", [Intent.CLARIFY])
     primary  = intents[0] if intents else Intent.CLARIFY
 
-    # ── Step 4: 추천/법적·의학적 판단 요청 차단 ───────────────
-    if primary == Intent.RECOMMENDATION:
-        return {
-            "language"     : language,
-            "intent"       : Intent.RECOMMENDATION,
-            "intents"      : intents,
-            "insurer"      : analysis.get("insurer", ""),
-            "insurers"     : analysis.get("insurers", []),
-            "slots"        : analysis.get("slots", {}),
-            "missing_slots": analysis.get("missing_slots", []),
-            "answer"       : (
-                "죄송합니다. 보험 상품 추천, 플랜 선택 권유, 법적·의학적 최종 판단은 제공하지 않습니다. "
-                "보험 혜택·절차·청구 등 구체적인 질문을 해주세요.\n\n"
-                "Sorry, we do not provide insurance product recommendations, plan selection advice, "
-                "or legal/medical final judgments. "
-                "Please ask about coverage details, procedures, or claims."
-            ),
-        }
-
-    return {
-        "language"     : language,
-        "intent"       : primary,
-        "intents"      : intents,
-        "insurer"      : analysis.get("insurer", ""),
-        "insurers"     : analysis.get("insurers", []),
-        "slots"        : analysis.get("slots", {}),
+    # 1. 기본 정보 세팅
+    update_dict = {
+        "language": language,
+        "intent": primary,
+        "intents": intents,
         "missing_slots": analysis.get("missing_slots", []),
     }
 
+    # 2. 보험사 정보가 있을 때만 추가
+    new_insurer = analysis.get("insurer")
+    if new_insurer:
+        update_dict["insurer"] = new_insurer
+
+    # 3. 복수 보험사 정보가 있을 때만 추가
+    new_insurers = analysis.get("insurers")
+    if new_insurers:
+        update_dict["insurers"] = new_insurers
+
+# 4. 슬롯 정보가 비어있지 않을 때만 추가/업데이트
+    new_slots = analysis.get("slots")
+    if new_slots:
+        # 기존 state에 저장되어 있던 slots를 복사해옵니다.
+        # (state에 slots가 아예 없을 수도 있으니 {}를 기본값으로 설정합니다.)
+        updated_slots = state.get("slots", {}).copy()
+        
+        # 새로운 슬롯 데이터 중 값이 있는 것(빈 문자열이 아닌 것)만 골라 기존 슬롯에 덮어씁니다.
+        for key, value in new_slots.items():
+            if value:  # 값이 존재할 때만 (예: "", 0, None이 아닐 때)
+                updated_slots[key] = value
+                
+        update_dict["slots"] = updated_slots
+
+    return update_dict
 
 # ──────────────────────────────────────────────────────────────
 # 내부 함수
