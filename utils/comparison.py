@@ -9,9 +9,32 @@
 
 from __future__ import annotations
 
-# ──────────────────────────────────────────────────────────────
+import json
+
 # 공개 API
-# ──────────────────────────────────────────────────────────────
+
+
+def parse_compare_table(raw_response: str) -> tuple[dict, str, list]:
+    """
+    LLM JSON 응답을 (compare_table, answer, related_questions) 로 파싱한다.
+    파싱 실패 시 빈 구조체를 반환한다.
+    """
+    try:
+        data = json.loads(raw_response) if isinstance(raw_response, str) else raw_response
+    except (json.JSONDecodeError, TypeError):
+        data = {}
+
+    compare_table = data.get("compare_table", {"header": [], "body": []})
+    if not isinstance(compare_table, dict):
+        compare_table = {"header": [], "body": []}
+
+    answer = data.get("answer", raw_response if isinstance(raw_response, str) else "")
+    related_questions = data.get("related_questions", [])
+    if not isinstance(related_questions, list):
+        related_questions = []
+
+    return compare_table, answer, related_questions
+
 
 def build_comparison_prompt(
     docs_by_subject: dict[str, list[str]],
