@@ -136,6 +136,27 @@ def analyze(state: InsuranceState) -> dict:
     # ── Step 2: 언어 감지 ──────────────────────────────────────
     language = detect_language(user_msg)
 
+    # ── Step 2-1: NHIS 대화 진행 중 short-circuit ─────────────
+    # 아래 두 경우 LLM 재분류 없이 바로 nhis 라우팅
+    #   ① nhis_step == "eligibility_check" + nhis_history 비어있지 않음
+    #      이유: "E-7 비자예요", "회사 다녀요" 같은 맥락 답변을
+    #            intent router가 단독으로 보면 clarify로 오분류하기 때문
+    #   ② nhis_step == "info"
+    #      이유: 자격 확인 완료 후 NHIS 정보 질문(보험료·급여 등)을
+    #            intent router가 procedure/general_query로 오분류하기 때문
+    nhis_step = state.get("nhis_step")
+    if (nhis_step == "info"
+            or (nhis_step == "eligibility_check" and state.get("nhis_history"))):
+        return {
+            "language"     : language,
+            "intent"       : Intent.NHIS,
+            "intents"      : [Intent.NHIS],
+            "insurer"      : state.get("insurer", ""),
+            "insurers"     : state.get("insurers", []),
+            "slots"        : state.get("slots", {}),
+            "missing_slots": [],
+        }
+
     # ── Step 3: Intent Router (LLM) ────────────────────────────
     analysis = _run_intent_router(user_msg)
 
