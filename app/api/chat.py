@@ -35,5 +35,24 @@ async def chat(request: ChatRequest):
 @router.get("/download/{insurer}/{filename}")
 async def download_file(filename: str, insurer: str):
     root_directory = os.path.dirname(os.path.abspath(os.path.dirname(os.path.abspath(os.path.dirname(__file__)))))
-    file_path = os.path.join(root_directory, 'data', insurer.lower(), 'claim_forms', filename)
+    file_path = os.path.join(root_directory, 'data', _normalize_insurer(insurer.lower()), 'claim_forms', filename)
     return FileResponse(path=file_path, filename=filename)
+
+def _normalize_insurer(insurer: str) -> str:
+    """
+    보험사명을 시스템 내부 코드로 정규화한다.
+    """
+    insurer = (insurer or "").lower().strip()
+
+    aliases = {
+        "uhc": "uhcg",
+        "uhcg": "uhcg",
+        "unitedhealth": "uhcg",
+        "cigna": "cigna",
+        "tricare": "tricare",
+        "msh china": "msh",
+        "msh_china": "msh",
+        "nhis": "nhis"
+    }
+
+    return aliases.get(insurer, insurer)

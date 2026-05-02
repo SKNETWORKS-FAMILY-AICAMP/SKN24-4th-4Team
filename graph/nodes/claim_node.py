@@ -201,19 +201,21 @@ def claim(state: InsuranceState) -> dict:
 
 def _normalize_insurer(insurer: str) -> str:
     """
-    보험사명을 컬렉션/metadata 기준 코드로 정규화한다.
+    보험사명을 시스템 내부 코드로 정규화한다.
     """
     insurer = (insurer or "").lower().strip()
 
     aliases = {
         "uhc": "uhcg",
         "uhcg": "uhcg",
+        "unitedhealth": "uhcg",
         "cigna": "cigna",
         "tricare": "tricare",
         "msh": "msh_china",
         "msh china": "msh_china",
         "msh_china": "msh_china",
         "nhis": "nhis",
+        "compare": "compare",
     }
 
     return aliases.get(insurer, insurer)

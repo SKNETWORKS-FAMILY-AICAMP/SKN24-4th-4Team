@@ -198,6 +198,7 @@ def _normalize_insurer(insurer: str) -> str:
     aliases = {
         "uhc": "uhcg",
         "uhcg": "uhcg",
+        "unitedhealth": "uhcg",
         "cigna": "cigna",
         "tricare": "tricare",
         "msh": "msh_china",
