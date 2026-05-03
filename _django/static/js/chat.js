@@ -77,7 +77,7 @@ function botMessageAppend(message) {
           <div class="ask-line">
             <img src="/static/images/bot_profile.png" alt="Bot Avatar" class="ask-avatar">
             <div class="message-bubble-left" style="margin-top:10px">
-              ${message}
+              ${marked.parse(message)}
             </div>
           </div>
         </div>
