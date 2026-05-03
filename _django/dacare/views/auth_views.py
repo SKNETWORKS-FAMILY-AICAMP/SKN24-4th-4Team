@@ -13,6 +13,9 @@ from dacare.utils.generator import generate_temp_password, generate_verify_code
 from dacare.utils.request import get_client_ip, get_json_body, json_error, json_success
 from dacare.utils.security import hash_password, verify_password
 
+from django.core.mail import EmailMultiAlternatives
+from django.template.loader import render_to_string
+
 VERIFY_CODE_EXPIRE_MINUTES = 3
 
 def get_verify_code_expire_time():
@@ -114,16 +117,24 @@ def issue_verify_code(request):
         req_ip=get_client_ip(request)
     )
 
-    send_mail(
-        subject='Dacare Verification Code',
-        message=(
-            f'Your Dacare verification code is {verify_code}.\n\n'
-            f'This code is valid for {VERIFY_CODE_EXPIRE_MINUTES} minutes.'
-        ),
-        from_email=settings.DEFAULT_FROM_EMAIL,
-        recipient_list=[user_email],
-        fail_silently=False,
+    #이메일 형식 변경
+    html_content = render_to_string(
+        "email/verification.html",
+        {
+            "verification_code": verify_code,
+            "expire_minutes": VERIFY_CODE_EXPIRE_MINUTES,
+        }
     )
+
+    msg = EmailMultiAlternatives(
+        subject='Dacare Verification Code',
+        body=f'Your verification code is {verify_code}',
+        from_email=settings.DEFAULT_FROM_EMAIL,
+        to=[user_email],
+    )
+    
+    msg.attach_alternative(html_content, "text/html")
+    msg.send()
 
     return json_success('Verification code has been sent to your email.')
 
