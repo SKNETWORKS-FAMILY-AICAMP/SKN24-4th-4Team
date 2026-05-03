@@ -723,6 +723,7 @@ document.addEventListener("DOMContentLoaded", () => {
     $(".dropdown-trigger").removeClass("hidden");
     renderInsuranceChat();
   } else if (chatState.compare) {
+    $(".dropdown-trigger").addClass("hidden");
     renderCompareScreen();
   } else {
     renderSelectCardScreen();
@@ -783,7 +784,10 @@ function sendChatMessage() {
       }
       bot_message = response['bot_message'];
       botMessageAppend(bot_message.answer); // response.bot_reply는 챗봇의 답변이라고 가정
-
+      
+      if(bot_message.sources) {
+        sourcesAppend(bot_message.sources);
+      }
       // response에 claim_form, compare_table, related_questions가 있는 경우
       if (bot_message.claim_form) {
         fileMessageAppend(bot_message.claim_form);
@@ -853,7 +857,7 @@ function renderChatHistory() {
   apiRequest(`/chat/list/`, "GET").then((response) => {
     $.each(response, function(idx, history) {
       document.getElementById("historyList").innerHTML += (`
-        <div class="history-item" data-history-id="${history.chat_id}" onclick="window.location.href='${history.insurance_name === "Compare" ? `./chat?compare=true&chat_id=${history.chat_id}` : `./chat?insurance=${history.insurance_name}&chat_id=${history.chat_id}`}'">
+        <div class="history-item" data-history-id="${history.chat_id}" onclick="window.location.href='${history.insurance_name === "compare" ? `./chat?compare=true&chat_id=${history.chat_id}` : `./chat?insurance=${history.insurance_name}&chat_id=${history.chat_id}`}'">
             <button class="history-btn" type="button">${history.reg_dt} - ${history.insurance_name}</button>
             <button class="history-delete-btn" type="button" aria-label="Delete history" onclick="confirmDeleteHistory(event, this)">✕</button>
         </div>
@@ -997,11 +1001,10 @@ function sourcesAppend(sources) {
 
   const $messageRow = $(`
     <div class="sources-inline">
-      <span class="source-chip">출처 :</span>
+      <span class="source-chip">Source :</span>
       ${uniqueSources.map(s => `
         <span class="source-chip">
           ${s.document_name}
-          ${s.page ? `p.${s.page}` : ""}
         </span>
       `).join("")}
     </div>
