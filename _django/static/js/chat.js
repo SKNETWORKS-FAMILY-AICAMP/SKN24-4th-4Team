@@ -818,7 +818,7 @@ function loadChatHistory_dtl(chat_id) {
     renderChatHistory_dtl(response.messages);
   }).catch((error) => {
     console.error("Failed to load chat history:", error);
-    openAlert("Failed to load chat history. Please try again.");
+    openAlert("Failed to load chat history. Please try again.", './chat');
   });
 }
 
