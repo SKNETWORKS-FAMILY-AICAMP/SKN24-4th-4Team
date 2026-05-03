@@ -1,0 +1,95 @@
+[33mcommit da554374fa0f75e16d93df953fb6aa959972c3b8[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mpublishing[m[33m, [m[1;31morigin/publishing[m[33m)[m
+Author: kimjiwon <iveou1037@naver.com>
+Date:   Thu Apr 30 00:49:55 2026 +0900
+
+    feat: 회원탈퇴, 피드백 기능 개선(오류 수정)
+
+[33mcommit 9ccb46acb8a9fb931f495cb41e01fb0105f7d907[m
+Author: kimjiwon <iveou1037@naver.com>
+Date:   Wed Apr 29 02:18:26 2026 +0900
+
+    feat: 회원탈퇴 기능 개선(비밀번호 입력 - 사용자의 의지 확인)
+
+[33mcommit acf5aa2a87c7ba887a8ad31ffce2e2589a91948b[m
+Author: KimSujin02 <selina9135@gmail.com>
+Date:   Tue Apr 28 21:45:40 2026 +0900
+
+    css 정리, 세션 시간 롤백, api 로딩 스피너 추가, 이용약관 관련 회원가입 모달 데이터 초기화 문제 개선 등
+    
+    Co-authored-by: Copilot <copilot@github.com>
+
+[33mcommit bd029bdfab5ba9d00dd983421a51c9a40e45cf5e[m
+Author: KimSujin02 <selina9135@gmail.com>
+Date:   Tue Apr 28 20:51:46 2026 +0900
+
+    404페이지 추가, 세션 만료 팝업 + 실시간 남은 시간 계산, chatsend버튼, 임시 비밀번호 프로세스 수정, 인증코드 삭제 쿼리 추가 등
+
+[33mcommit 1ba873dcd8b41095dee3683bd67cba58a2f86c7a[m
+Author: kimjiwon <iveou1037@naver.com>
+Date:   Mon Apr 27 01:20:46 2026 +0900
+
+    이용약관 UI 수정
+
+[33mcommit bd0669b3865a5a932dcf5f8963a82c42ce1f9ab5[m
+Author: KimSujin02 <selina9135@gmail.com>
+Date:   Sun Apr 26 22:39:03 2026 +0900
+
+    수정
+
+[33mcommit 05bf5a31ccc7be639161786b32828d0fddf5eb6d[m
+Author: KimSujin02 <selina9135@gmail.com>
+Date:   Sun Apr 26 22:38:16 2026 +0900
+
+    김수진 회원가입, 로그인, 로그아웃, 세션관련(테스트 필요) 완료
+    
+    Co-authored-by: Copilot <copilot@github.com>
+
+[33mcommit 25776c3f3d044f832210f0cb05b613869dbe5e09[m
+Author: kimjiwon <iveou1037@naver.com>
+Date:   Fri Apr 24 02:05:15 2026 +0900
+
+    feat: 로그인, 회원가입 에러 수정
+
+[33mcommit 19b69865d99b1ce9e91eb9196bcef54b9164e9b2[m
+Author: kimjiwon <kjw92078564@gmail.com>
+Date:   Thu Apr 23 20:13:05 2026 +0900
+
+    feat: 로그인, 회원가입 수정
+
+[33mcommit cd6658e9eab0a10e5699340cd86867f98c0d4a1d[m
+Author: KimSujin02 <selina9135@gmail.com>
+Date:   Thu Apr 23 14:05:41 2026 +0900
+
+    지원님 작업 추가
+    
+    Co-authored-by: Copilot <copilot@github.com>
+
+[33mcommit fa992438b3bf65bf748ad2cf6238a289d05aa293[m
+Author: KimSujin02 <selina9135@gmail.com>
+Date:   Wed Apr 22 20:28:18 2026 +0900
+
+    채팅 화면 구성 및 동적 기능 추가
+
+[33mcommit 7b17e02817cee71b210d0e591a69d535567b065f[m
+Author: KimSujin02 <selina9135@gmail.com>
+Date:   Wed Apr 22 09:25:00 2026 +0900
+
+    수정
+
+[33mcommit efd3c03a04cc478b7fc0b218d1e882d3d00f026f[m
+Author: KimSujin02 <selina9135@gmail.com>
+Date:   Tue Apr 21 13:25:44 2026 +0900
+
+    django 구조 생성 및 최초 화면, 챗봇 화면 초기 구성
+
+[33mcommit 8dc31235b64cf2e83f3ba6d9799cdec0963fea16[m[33m ([m[1;32mdev[m[33m)[m
+Author: whitehole17 <cookie69819@gmail.com>
+Date:   Mon Apr 20 18:44:04 2026 +0900
+
+    docs: PR template 추가
+
+[33mcommit acd452922ae681daab3e9880fb15f351de14ec12[m[33m ([m[1;31morigin/main[m[33m)[m
+Author: whitehole17 <91847112+whitehole17@users.noreply.github.com>
+Date:   Sun Apr 19 16:55:30 2026 +0900
+
+    Initial commit
