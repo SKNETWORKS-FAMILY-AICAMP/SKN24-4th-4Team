@@ -424,6 +424,15 @@ function eventBind() {
       } catch(e){}
     });
   }
+  
+  const signupAgree = document.getElementById("signupAgree");
+  if (signupAgree) {
+    signupAgree.addEventListener("click", (e) => {
+      e.preventDefault();   // 바로 체크되는 것 방지
+      saveSignupData();
+      openTerms();
+    });
+  }
 
   // 이용약관 팝업 내 체크박스 이벤트: 두 박스 모두 체크 시 Agree 버튼 활성화
   const termsCheck = document.getElementById("termsCheck");

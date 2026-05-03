@@ -71,18 +71,29 @@ function userMessageAppend(message) {
 
 // bot 답변 추가 함수
 function botMessageAppend(message) {
-  $("#chat_stage").append(`
-      <div class="message-row left">
-        <div style="width:100%">
-          <div class="ask-line">
-            <img src="/static/images/bot_profile.png" alt="Bot Avatar" class="ask-avatar">
-            <div class="message-bubble-left" style="margin-top:10px">
-              ${message}
-            </div>
+  const $messageRow = $(`
+    <div class="message-row left">
+      <div style="width:100%">
+        <div class="ask-line">
+          <img src="/static/images/bot_profile.png" alt="Bot Avatar" class="ask-avatar">
+          <div class="message-bubble-left" style="margin-top:10px">
+            ${marked.parse(message)}
           </div>
         </div>
       </div>
-    `);
+    </div>
+  `);
+
+  $("#chat_stage").append($messageRow);
+
+  // 답변 쪽으로 포커스/스크롤
+  $messageRow[0].scrollIntoView({
+    behavior: "smooth",
+    block: "center"
+  });
+
+  // 다시 입력창 포커스
+  $("#chatInput").focus();
 }
 
 // 보험 선택 화면 렌더링 함수
@@ -712,6 +723,7 @@ document.addEventListener("DOMContentLoaded", () => {
     $(".dropdown-trigger").removeClass("hidden");
     renderInsuranceChat();
   } else if (chatState.compare) {
+    $(".dropdown-trigger").addClass("hidden");
     renderCompareScreen();
   } else {
     renderSelectCardScreen();
@@ -772,7 +784,10 @@ function sendChatMessage() {
       }
       bot_message = response['bot_message'];
       botMessageAppend(bot_message.answer); // response.bot_reply는 챗봇의 답변이라고 가정
-
+      
+      if(bot_message.sources) {
+        sourcesAppend(bot_message.sources);
+      }
       // response에 claim_form, compare_table, related_questions가 있는 경우
       if (bot_message.claim_form) {
         fileMessageAppend(bot_message.claim_form);
@@ -803,7 +818,7 @@ function loadChatHistory_dtl(chat_id) {
     renderChatHistory_dtl(response.messages);
   }).catch((error) => {
     console.error("Failed to load chat history:", error);
-    openAlert("Failed to load chat history. Please try again.");
+    openAlert("Failed to load chat history. Please try again.", './chat');
   });
 }
 
@@ -818,6 +833,9 @@ function renderChatHistory_dtl(history_list) {
       botMessageAppend(entry.chat_content);
       // response에 claim_form, compare_table, related_questions가 있는 경우
       content_all = entry.chat_content_all;
+      if(content_all.sources) {
+        sourcesAppend(content_all.sources);
+      }
       if (content_all.claim_form) {
         fileMessageAppend(content_all.claim_form);
       }
@@ -839,7 +857,7 @@ function renderChatHistory() {
   apiRequest(`/chat/list/`, "GET").then((response) => {
     $.each(response, function(idx, history) {
       document.getElementById("historyList").innerHTML += (`
-        <div class="history-item" data-history-id="${history.chat_id}" onclick="window.location.href='${history.insurance_name === "Compare" ? `./chat?compare=true&chat_id=${history.chat_id}` : `./chat?insurance=${history.insurance_name}&chat_id=${history.chat_id}`}'">
+        <div class="history-item" data-history-id="${history.chat_id}" onclick="window.location.href='${history.insurance_name === "compare" ? `./chat?compare=true&chat_id=${history.chat_id}` : `./chat?insurance=${history.insurance_name}&chat_id=${history.chat_id}`}'">
             <button class="history-btn" type="button">${history.reg_dt} - ${history.insurance_name}</button>
             <button class="history-delete-btn" type="button" aria-label="Delete history" onclick="confirmDeleteHistory(event, this)">✕</button>
         </div>
@@ -867,7 +885,7 @@ function confirmDeleteHistory(event, button) {
 // 챗봇이 파일을 return 했을 때 메시지에 파일 첨부하는 함수
 function fileMessageAppend(claim_form) {
   $.each(claim_form, function(idx, value) {
-    $("#chat_stage").append(`
+    const $messageRow = $(`
         <div class="file-attachment-wrap">
           <button class="file-attachment" type="button" onclick="downloadAttachedFile('${value.claim_form_name}')">
             <span class="file-icon" aria-hidden="true">
@@ -881,7 +899,19 @@ function fileMessageAppend(claim_form) {
               <!-- <span class="file-size">${value.file_type} · ${value.file_size}</span> -->
             </span>
           </button>
-        </div>`);
+        </div>
+    `);
+
+    $("#chat_stage").append($messageRow);
+
+    // 답변 쪽으로 포커스/스크롤
+    $messageRow[0].scrollIntoView({
+      behavior: "smooth",
+      block: "center"
+    });
+
+    // 다시 입력창 포커스
+    $("#chatInput").focus();
   });
 }
 
@@ -900,32 +930,92 @@ function downloadAttachedFile(fileName) {
 
 // 챗봇 답변 아래에 비교 테이블 추가하는 함수
 function compareTableAppend(compare_table) {
-  $("#chat_stage").append(`
+  const $messageRow = $(`
     <div class="table-wrap">
-          <table class="compare-table">
-            <thead>
-              <tr>
-                ${compare_table.header.map(header => `<th>${header}</th>`).join("")}
-              </tr>
-            </thead>
-            <tbody>
-              ${compare_table.body.map(row => `
-                  <tr>
-                    ${row.map((cell, index) => 
-                      index === 0 ? `<th>${cell}</th>` : `<td>${cell}</td>`
-                    ).join("")}
-                  </tr>
-                `).join("")}
-            </tbody>
-          </table>
-        </div>`);
+    <table class="compare-table">
+      <thead>
+        <tr>
+          ${compare_table.header.map(header => `<th>${header.replaceAll('**', '')}</th>`).join("")}
+        </tr>
+      </thead>
+      <tbody>
+        ${compare_table.body.map(row => `
+            <tr>
+              ${row.map((cell, index) => 
+                index === 0 ? `<th>${cell.replaceAll('**', '')}</th>` : `<td>${cell}</td>`
+              ).join("")}
+            </tr>
+          `).join("")}
+      </tbody>
+    </table>
+  </div>
+  `);
+
+  $("#chat_stage").append($messageRow);
+
+  // 답변 쪽으로 포커스/스크롤
+  $messageRow[0].scrollIntoView({
+    behavior: "smooth",
+    block: "center"
+  });
+
+  // 다시 입력창 포커스
+  $("#chatInput").focus();
 }
 
 // 챗봇 답변 아래에 관련 질문 리스트 추가하는 함수
 function relatedQuestionsAppend(related_questions) {
-  $("#chat_stage").append(`
+  if (!related_questions || related_questions.length === 0) return;
+  const $messageRow = $(`
       <div class="prompt-row message-row left">
         ${related_questions.map(question => `<button class="prompt-pill" data-fill="${question}">${question}</button>`).join("")}
-      </div>`);
-    bindFillEvents();
+    </div>
+  `);
+
+  $("#chat_stage").append($messageRow);
+
+  // 답변 쪽으로 포커스/스크롤
+  $messageRow[0].scrollIntoView({
+    behavior: "smooth",
+    block: "center"
+  });
+
+  // 다시 입력창 포커스
+  $("#chatInput").focus();
+  bindFillEvents();
+}
+
+function sourcesAppend(sources) {
+  if (!sources || sources.length === 0) return;
+
+  // 🔥 document_name 기준 중복 제거
+  const uniqueSources = [];
+  const seen = new Set();
+
+  sources.forEach(s => {
+    if (!seen.has(s.document_name)) {
+      seen.add(s.document_name);
+      uniqueSources.push(s);
+    }
+  });
+
+  const $messageRow = $(`
+    <div class="sources-inline">
+      <span class="source-chip">Source :</span>
+      ${uniqueSources.map(s => `
+        <span class="source-chip">
+          ${s.document_name}
+        </span>
+      `).join("")}
+    </div>
+  `);
+
+  $("#chat_stage").append($messageRow);
+
+  $messageRow[0].scrollIntoView({
+    behavior: "smooth",
+    block: "center"
+  });
+
+  $("#chatInput").focus();
 }
