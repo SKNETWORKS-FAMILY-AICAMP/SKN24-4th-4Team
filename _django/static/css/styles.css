@@ -631,7 +631,7 @@ img {
   border-radius: 16px;
   border: 1px solid #d7eef8;
   background: #edf8ff;
-  padding: 14px 15px;
+  padding: 0px 15px;
   font-size: 12px;
   line-height: 1.62;
   color: #2c3e55;
@@ -1670,4 +1670,21 @@ img {
   height: 52px;
   border-radius: 12px;
   font-size: 16px;
+}
+
+.sources-inline {
+  margin-top: 6px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+  margin-left: 50px;
+}
+
+.source-chip {
+  font-size: 11px;
+  color: #888;
+  background: transparent;
+  padding: 2px 6px;
+  border-radius: 4px;
 }
