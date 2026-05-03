@@ -118,19 +118,19 @@ def compare(state: InsuranceState) -> dict:
 
         if not docs:
             docs_by_insurer[insurer_label] = []
-        continue
+            continue
 
-    try:
-        ranked = rerank_by_relevance(
-            docs=[d.get("content", "") for d in docs],
-            metadatas=[d.get("metadata", {}) for d in docs],
-            top_k=5,
-        )
-    except Exception:
-        ranked = docs[:5]
+        try:
+            ranked = rerank_by_relevance(
+                docs=[d.get("content", "") for d in docs],
+                metadatas=[d.get("metadata", {}) for d in docs],
+                top_k=5,
+            )
+        except Exception:
+            ranked = docs[:5]
 
-    docs_by_insurer[insurer_label] = [d.get("content", "") for d in ranked]
-    all_retrieved.extend(ranked)
+        docs_by_insurer[insurer_label] = [d.get("content", "") for d in ranked]
+        all_retrieved.extend(ranked)
 
     # ── 비교 프롬프트 조립 ───────────────────────────────────
     comparison_prompt = _build_comparison_prompt(
