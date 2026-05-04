@@ -195,6 +195,14 @@
 
 ## 9. 수행 결과 및 향후 개선점
 
+### 🚀 3차 vs 4차 응답 성능 비교
+
+| 3차 응답 | 4차 응답 |
+| :---: | :---: |
+| <img width="1051" height="605" alt="image" src="https://github.com/user-attachments/assets/5a96908d-966d-4b9b-a1b8-c2006cf27ae1" /> | <img width="1531" height="987" alt="스크린샷 2026-05-04 11 57 43" src="https://github.com/user-attachments/assets/16e6f168-ecd9-4a65-a105-5112b60ec974" /> |
+| RAG를 통해 기간이 제한되어 있다는 응답은 내놓지만 구체적으로 며칠인지는 응답하지 못합니다. | RAG 성능을 향샹시켜 구체적으로 국적국에서의 치료는 보험기간동안 최대 **180일** 적용 된다는 답변을 내놓습니다. |
+
+
 ### 시연 시나리오
 
 1. 회원가입 → 로그인
