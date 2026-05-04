@@ -165,7 +165,8 @@
 
 ## 8. 테스트 계획 및 결과
 
-<img width="727" height="611" alt="테스트 결과" src="https://github.com/user-attachments/assets/d993d5e3-23e2-4bf9-b322-7796cccdb508" />
+<img width="727" height="611" alt="테스트 결과" src="https://github.com/user-attachments/assets/660a5589-27a4-4979-8189-82fe61082dfd" />
+
 
 
 ### 테스트 요약
