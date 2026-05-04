@@ -71,27 +71,29 @@
 ### Frontend / Web
 | 분야 | 기술 | 
 |------|------|
-| 웹 프레임워크 | Django | 
-| 언어 | Python, JavaScript (Vanilla + jQuery) | 
-| DB | MySQL | 
+| 웹 프레임워크 | ![Django](https://img.shields.io/badge/Django-092E20?style=for-the-badge&logo=django&logoColor=white) | 
+| 언어 | ![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white) ![JavaScript](https://img.shields.io/badge/JavaScript+-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black) ![jQuery](https://img.shields.io/badge/jQuery-0769AD?style=for-the-badge&logo=jquery&logoColor=white) | 
+| DB | ![MySQL](https://img.shields.io/badge/MySQL-4479A1?style=for-the-badge&logo=mysql&logoColor=white) | 
 | 인증 | 세션 기반 인증 | 
 
 ### AI / LLM 서버
 | 분야 | 기술 | 선택 이유 |
-|------|------|-----------|
-| API 서버 | FastAPI | 비동기 처리로 LangGraph 파이프라인 병렬 호출에 최적 |
-| AI 파이프라인 | LangGraph 1.1.3 | 노드 단위 상태 관리 + 조건부 라우팅으로 복잡한 intent 분기 처리 |
-| LLM | GPT-4o-mini | 안전 필터·intent 분류·언어 감지 및 관련질문, 최종답변 mini로 비용 절감. 동급 성능의 sLLM은 최소 A100급 GPU(약 $2.79/hr) 필요 — API 방식 대비 인프라 비용 및 운영 부담이 커 OpenAI API 채택 |
-| 임베딩 | BAAI/bge-m3 (다국어 100+ 언어) | 단일 모델로 100개 언어 임베딩 통일 — 다국어 문서 혼재 문제 해결 |
-| 벡터 DB | ChromaDB | 외부 서버 없이 로컬 파일 기반 운영 — EC2 단일 인스턴스 배포에 적합 |
-| RAG 프레임워크 | LangChain | |
+|------|--------------------------------------|------|
+| API 서버 | ![FastAPI](https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white) | 비동기 처리로 LangGraph 파이프라인 병렬 호출에 최적 |
+| AI 파이프라인 | ![LangGraph](https://img.shields.io/badge/LangGraph-000000?style=for-the-badge&logo=chainlink&logoColor=white) | 노드 단위 상태 관리 + 조건부 라우팅으로 복잡한 intent 분기 처리 |
+| LLM | ![OpenAI](https://img.shields.io/badge/GPT--4o--mini-OpenAI_API-412991?style=for-the-badge&logo=openai&logoColor=white) | 안전 필터·intent 분류·언어 감지 및 관련질문, 최종답변 mini로 비용 절감. 동급 성능의 sLLM은 최소 A100급 GPU(약 $2.79/hr) 필요<br> — API 방식 대비 인프라 비용 및 운영 부담이 커 OpenAI API 채택 |
+| 임베딩 | ![bge-m3](https://img.shields.io/badge/BAAI-bge--m3-FF6F00?style=for-the-badge) | 단일 모델로 100개 언어 임베딩 통일 — 다국어 문서 혼재 문제 해결 |
+| 벡터 DB | ![ChromaDB](https://img.shields.io/badge/ChromaDB-Vector_DB-5A31F4?style=for-the-badge) | 외부 서버 없이 로컬 파일 기반 운영 — EC2 단일 인스턴스 배포에 적합 |
+| RAG 프레임워크 | ![LangChain](https://img.shields.io/badge/LangChain-005F73?style=for-the-badge) | |
 
 ### 인프라
 | 분야 | 기술 | 
-|------|------|
-| 배포 | AWS EC2 | 
-| 웹 서버 | Nginx (리버스 프록시) |
-| 환율 API | ExchangeRate-API |
+|----------------|----------------------------------------------------|
+| Cloud          | ![AWS EC2](https://img.shields.io/badge/AWS-EC2-FF9900?style=for-the-badge&logo=amazonaws&logoColor=white) ![AWS RDS](https://img.shields.io/badge/AWS-RDS-527FFF?style=for-the-badge&logo=amazonaws&logoColor=white) |
+| GPU Inference  | ![RunPod](https://img.shields.io/badge/RunPod-GPU_Inference-7B61FF?style=for-the-badge) |
+| Container      | ![Docker](https://img.shields.io/badge/Docker-Container-2496ED?style=for-the-badge&logo=docker&logoColor=white) |
+| Web Server     | ![Nginx](https://img.shields.io/badge/Nginx-Reverse_Proxy-009639?style=for-the-badge&logo=nginx&logoColor=white) |
+| External API   | ![ExchangeRate API](https://img.shields.io/badge/ExchangeRate-API-4CAF50?style=for-the-badge) |
 
 ---
 
