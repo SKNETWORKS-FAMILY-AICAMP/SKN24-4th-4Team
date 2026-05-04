@@ -81,7 +81,7 @@
 |------|------|-----------|
 | API 서버 | FastAPI | 비동기 처리로 LangGraph 파이프라인 병렬 호출에 최적 |
 | AI 파이프라인 | LangGraph 1.1.3 | 노드 단위 상태 관리 + 조건부 라우팅으로 복잡한 intent 분기 처리 |
-| LLM | GPT-4o / GPT-4o-mini | 안전 필터·intent 분류·언어 감지는 mini로 비용 절감, 최종 답변 생성은 4o로 품질 확보. 동급 성능의 sLLM은 최소 A100급 GPU(약 $2.79/hr) 필요 — API 방식 대비 인프라 비용 및 운영 부담이 커 OpenAI API 채택 |
+| LLM | GPT-4o-mini | 안전 필터·intent 분류·언어 감지 및 관련질문, 최종답변 mini로 비용 절감. 동급 성능의 sLLM은 최소 A100급 GPU(약 $2.79/hr) 필요 — API 방식 대비 인프라 비용 및 운영 부담이 커 OpenAI API 채택 |
 | 임베딩 | BAAI/bge-m3 (다국어 100+ 언어) | 단일 모델로 100개 언어 임베딩 통일 — 다국어 문서 혼재 문제 해결 |
 | 벡터 DB | ChromaDB | 외부 서버 없이 로컬 파일 기반 운영 — EC2 단일 인스턴스 배포에 적합 |
 | RAG 프레임워크 | LangChain | |
