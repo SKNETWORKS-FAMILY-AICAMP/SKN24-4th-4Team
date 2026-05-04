@@ -69,12 +69,12 @@
 ## 3. 기술 스택
 
 ### Frontend / Web
-| 분야 | 기술 | 선택 이유 |
-|------|------|-----------|
-| 웹 프레임워크 | Django | 세션 인증, ORM, Admin 내장 — 회원/채팅 히스토리 관리를 빠르게 구현 |
-| 언어 | Python, JavaScript (Vanilla + jQuery) | |
-| DB | MySQL | 채팅 히스토리·피드백 등 관계형 데이터 구조에 적합 |
-| 인증 | 세션 기반 인증 | |
+| 분야 | 기술 | 
+|------|------|
+| 웹 프레임워크 | Django | 
+| 언어 | Python, JavaScript (Vanilla + jQuery) | 
+| DB | MySQL | 
+| 인증 | 세션 기반 인증 | 
 
 ### AI / LLM 서버
 | 분야 | 기술 | 선택 이유 |
@@ -87,11 +87,11 @@
 | RAG 프레임워크 | LangChain | |
 
 ### 인프라
-| 분야 | 기술 | 선택 이유 |
-|------|------|-----------|
-| 배포 | AWS EC2 | |
-| 웹 서버 | Nginx (리버스 프록시) | |
-| 환율 API | ExchangeRate-API | |
+| 분야 | 기술 | 
+|------|------|
+| 배포 | AWS EC2 | 
+| 웹 서버 | Nginx (리버스 프록시) |
+| 환율 API | ExchangeRate-API |
 
 ---
 
