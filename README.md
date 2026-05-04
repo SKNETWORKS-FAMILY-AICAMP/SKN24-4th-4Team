@@ -42,7 +42,7 @@
 
 *   **외국인 보험 가입 급증 및 정보 비대칭**
     *   외국인 유학생 및 근로자의 보험 가입률은 매년 두 자릿수 성장률을 기록하고 있으나, 설문조사에 따르면 외국인 거주자의 약 60%가 "복잡한 용어와 언어 장벽으로 인해 보험 혜택을 포기한 적이 있다"고 답했습니다.
-    *   🔗 **[한국소비자원 - 외국인 소비자 국내 보험 이용 실태조사 (상세 보도자료)](https://www.kca.go.kr/kca/na/ntt/selectNttInfo.do?mi=2530&nttSn=31015)**
+    *   🔗 **[한국소비자원 - 외국인 소비자 국내 보험 이용 실태조사 (상세 보도자료)](https://www.kcredit.or.kr:1441/archive/cisReportView.do?_csrf=ba7c8471-bc09-4f0a-bb1c-1ac81beb00e9&hpBoardSn=CIS_REPORT&hpBoardIdSn=1648&menuNo=420&link=archive%2FcisReportView.do&searchData=searchDateCbo%3Dall%40%40searchFiledCbo%3Dall%40%40searchTextEdt%3D%EB%B3%B4%ED%97%98%40%40searchPage%3D1)**
 
 *   **한국 특유의 의료 행정 절차와 언어 장벽**
     *   영문 약관이 존재하더라도 한국의 실시간 환율, 본인부담금(Deductible), 그리고 민간보험-국민건강보험 간의 청구 우선순위 등 행정적 맥락을 이해하는 데 외국인들은 심각한 소통 장애를 겪고 있습니다.
