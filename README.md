@@ -26,10 +26,10 @@
 
 | 이름 | Github |
 |------|------|
-| 권민제 |  |
-| 김수진 |  |
-| 김은우 |  |
-| 김지원 |  |
+| 권민제 | https://github.com/min3802 |
+| 김수진 | https://github.com/KimSujin02 |
+| 김은우 | https://github.com/whitehole17 |
+| 김지원 | https://github.com/edu-ai-jiwon |
 
 ---
 
