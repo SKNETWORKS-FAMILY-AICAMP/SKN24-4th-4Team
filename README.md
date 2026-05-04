@@ -115,7 +115,9 @@
 ## 6. 화면 설계서
 
 <img width="3000" height="1688" alt="4차 프로젝트 화면설계서_page-0001" src="https://github.com/user-attachments/assets/cccd9ee3-2667-4065-95d7-7bc34ddc87fb" />
-
+<img width="3000" height="1688" alt="4차 프로젝트 화면설계서_page-0002" src="https://github.com/user-attachments/assets/590160b2-a375-4bad-a71e-90db85f59e9f" />
+<img width="3000" height="1688" alt="4차 프로젝트 화면설계서_page-0005" src="https://github.com/user-attachments/assets/94da2d36-2d02-49f7-a894-c9fe8bdd2850" />
+<img width="3000" height="1688" alt="4차 프로젝트 화면설계서_page-0010" src="https://github.com/user-attachments/assets/eec7d3b9-3c9e-4143-8748-8adb476deca8" />
 
 
 ---
