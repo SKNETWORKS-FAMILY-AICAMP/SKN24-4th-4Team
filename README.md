@@ -97,20 +97,8 @@
 
 ## 4. WBS
 
-| 단계 | 작업 항목 | 담당 | 기간 |
-|------|----------|------|------|
-| 기획 | 요구사항 정의, 화면 설계 | 전체 | |
-| 데이터 | 보험사 PDF 수집 및 전처리 | | |
-| 데이터 | ChromaDB 인덱싱 | | |
-| 백엔드(LLM) | LangGraph 파이프라인 구축 | | |
-| 백엔드(LLM) | Intent Router 구현 | | |
-| 백엔드(LLM) | 각 노드 구현 (9개) | | |
-| 프론트엔드 | Django 웹 서버 구축 | | |
-| 프론트엔드 | 인증/세션 구현 | | |
-| 프론트엔드 | 채팅 UI 구현 | | |
-| 통합 | Django ↔ FastAPI 연동 | | |
-| 테스트 | 기능 테스트 / 통합 테스트 | 전체 | |
-| 배포 | AWS EC2 배포 | | |
+<img width="2788" height="2040" alt="WBS" src="https://github.com/user-attachments/assets/97eb7fc1-be47-4963-8345-fc9896b7c90e" />
+
 
 ---
 
@@ -118,22 +106,8 @@
 
 ### 주요 기능 요구사항 (REQ-CHAT-001)
 
-| ID | 기능 | 중요도 |
-|----|------|--------|
-| REQ-AUTH-001 | 이메일/비밀번호 로그인, 5회 오류 시 계정 잠금 | Must |
-| REQ-AUTH-002 | 임시 비밀번호 이메일 발급 | Must |
-| REQ-AUTH-003 | 이메일 인증코드 기반 회원가입 | Must |
-| REQ-CHAT-001 | 보험사 선택 후 질의응답 (7개 언어 지원) | Must |
-| REQ-CHAT-002 | 꼬리 질문 3개 자동 추천 | Must |
-| REQ-CHAT-003 | 플랜 비교표 제공 (최대 5개 항목) | Must |
-| REQ-CHAT-004 | 본인부담금/환급액 계산 (실시간 환율 적용) | Must |
-| REQ-CHAT-005 | 청구서 양식 PDF 제공 | Must |
-| REQ-CHAT-006 | 질문 최대 500자 제한 | Must |
-| REQ-CHAT-007 | 보험 추천·법적·의학적 판단 안내 불가 | Must |
-| REQ-CHAT-008 | 모든 답변에 출처 명시 | Must |
-| REQ-CHAT-009 | 채팅 히스토리 목록 조회 | Must |
-| REQ-FDB-001 | 만족도 및 피드백 등록 (1000자 이내) | Must |
-| REQ-NTC-001 | 면책 고지 상시 표시 | Must |
+<img width="3479" height="2480" alt="요구사항명세서" src="https://github.com/user-attachments/assets/b7906b3c-2b16-47bb-8676-2b27209569f1" />
+
 
 ---
 
