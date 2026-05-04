@@ -92,7 +92,7 @@
 | GPU Inference  | ![RunPod](https://img.shields.io/badge/RunPod-GPU_Inference-7B61FF?style=for-the-badge) |
 | Container      | ![Docker](https://img.shields.io/badge/Docker-Container-2496ED?style=for-the-badge&logo=docker&logoColor=white) |
 | Web Server     | ![Nginx](https://img.shields.io/badge/Nginx-Reverse_Proxy-009639?style=for-the-badge&logo=nginx&logoColor=white) |
-| External API   | ![ExchangeRate API](https://img.shields.io/badge/ExchangeRate-API-4CAF50?style=for-the-badge) |
+| External API   | ![Frankfurter](https://img.shields.io/badge/Frankfurter-Exchange%20Rate%20API-blue)  |
 
 ---
 
