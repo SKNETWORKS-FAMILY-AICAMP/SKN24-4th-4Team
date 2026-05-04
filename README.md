@@ -154,52 +154,9 @@
 
 ## 7. 시스템 아키텍처
 
-### 배포 구성도
+<img width="6160" height="4600" alt="시스템아키텍쳐" src="https://github.com/user-attachments/assets/9ff3cdd5-d237-472d-b374-2683f4059882" />
 
-```
-[GitHub dev branch]
-        │ git pull
-        ▼
-   [Docker Compose]  ← AWS EC2에서 실행
-        │
-        ├── [Nginx 컨테이너]       리버스 프록시, HTTPS 처리
-        ├── [Django 컨테이너]      웹 서버 (인증, 세션, DB, 화면)  port 8000
-        └── [FastAPI 컨테이너]     AI 처리 서버 (LangGraph 파이프라인)  port 8002
-```
 
-### 서비스 흐름
-
-```
-사용자 브라우저
-        │ HTTPS
-        ▼
-    [Nginx]
-        │
-        ▼
-   [Django]  ← 인증/세션/채팅 히스토리 저장 (MySQL)
-        │ 내부 HTTP
-        ▼
-  [FastAPI]  ← AI 처리 전담
-        │
-        ▼
-   [analyze_node]  ← ① 안전 필터  ② 언어 감지  ③ Intent 분류 (GPT-4o-mini)
-        │
-        ├──→ [within_node]    보험 내 플랜 비교
-        ├──→ [compare_node]   보험사 간 비교
-        ├──→ [calculate_node] 환율·본인부담금 계산
-        ├──→ [procedure_node] 보험 절차 안내
-        ├──→ [nhis_node]      국민건강보험 상담
-        │         └──→ [claim_node]  (민간보험 청구 감지 시 추가 라우팅)
-        ├──→ [claim_node]     청구 절차 + 청구서 양식
-        ├──→ [general_node]   일반 보장·혜택 질의
-        ├──→ [clarify_node]   정보 부족 시 재질문
-        └──→ END              안전 필터 차단
-                │
-        ┌───────┴────────┐
-        │                │
-   [ChromaDB]      [OpenAI GPT]
-(보험사 문서 RAG)  (최종 답변 생성)
-```
 
 ### LangGraph 파이프라인
 
