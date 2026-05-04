@@ -23,12 +23,14 @@
 
 **팀명: DaCare (다케어)**
 
-| 이름 | Github |
-|------|------|
-| 권민제 | https://github.com/min3802 |
-| 김수진 | https://github.com/KimSujin02 |
-| 김은우 | https://github.com/whitehole17 |
-| 김지원 | https://github.com/edu-ai-jiwon |
+## 👥 팀 소개
+
+**팀명: DaCare (다케어)**
+
+| 권민제 | 김수진 | 김은우 | 김지원 |
+|--------|--------|--------|--------|
+| <img width="371" height="509" alt="은우님" src="https://github.com/user-attachments/assets/75496207-b338-413e-b55e-68319733ca49" /> | <<img width="380" height="517" alt="수진님" src="https://github.com/user-attachments/assets/bc69100f-7124-4432-8a06-c44e728c4533" /> |<img width="371" height="509" alt="은우님" src="https://github.com/user-attachments/assets/c538c7d8-1667-437a-96b4-afa0e4350456" />| <img width="380" height="517" alt="지원님" src="https://github.com/user-attachments/assets/354a6bb5-452a-42a6-8e17-4a08eb3daf52" /> |
+| [GitHub](https://github.com/min3802) | [GitHub](https://github.com/KimSujin02) | [GitHub](https://github.com/whitehole17) | [GitHub](https://github.com/edu-ai-jiwon) |
 
 ---
 ## 2. 프로젝트 개요
